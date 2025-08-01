@@ -11,13 +11,16 @@ const registerPatient = asyncHandler(async (req, res) => {
     //remove password from the response and refresh roken
     //check if patient is created successfully
     //return response to the frontend
-    const {name, email, password} = req.body
+
+    console.log("📦 Received body:", req.body);
+    const {name, email, password} = req.body || {}
+
 
     if(!name || !email || !password) {
         throw new ApiError(400, 'Please provide all the required fields')
     }
 
-    const existedPatient = Patient.findOne({email})
+    const existedPatient = await Patient.findOne({email})
 
     if(existedPatient) {
         throw new ApiError(409, 'Patient already exists with this email')

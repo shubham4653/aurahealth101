@@ -5,13 +5,12 @@ import { ApiResponse } from '../utils/ApiResponse.js';
 
 
 const registerProvider = asyncHandler(async (req, res) => {
-    const {name, email, password} = req.body
-    
+    const {name, email, password} = req.body 
         if(!name || !email || !password) {
             throw new ApiError(400, 'Please provide all the required fields')
         }
     
-        const existedProvider = Provider.findOne({email})
+        const existedProvider = await Provider.findOne({email})
     
         if(existedProvider) {
             throw new ApiError(409, 'Provider already exists with this email')
