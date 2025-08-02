@@ -1,6 +1,7 @@
 import {Router} from 'express';
 import { registerPatient, loginPatient } from '../controllers/patient.controller.js';
 import { verifyJWTPatient } from '../middlewares/authPatient.middleware.js';
+import { logoutPatient } from '../controllers/patient.controller.js';
 
 
 

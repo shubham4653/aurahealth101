@@ -1,6 +1,7 @@
 import {Router} from 'express';
 import { registerProvider } from '../controllers/provider.controller.js';
-
+import { loginProvider, logoutProvider } from '../controllers/provider.controller.js';
+import { verifyJWTProvider } from '../middlewares/authProvider.middleware.js';
 
 
 const router = Router();
