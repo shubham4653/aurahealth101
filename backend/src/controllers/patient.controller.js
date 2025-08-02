@@ -107,19 +107,51 @@ const loginPatient = asyncHandler(async (req, res) => {
     .status(200)
     .cookie('accessToken', accessToken, options)
     .cookie('refreshToken', refreshToken, options)
-    .json({
+    .json(
         new ApiResponse(
             200,
             {
                 patient: loggedInPatient,
                 accessToken,
                 refreshToken
-            }
+            },
+            "Patient logged in successfully"
         )
-    })
+    )
+})
 
+
+const logoutPatient = asyncHandler(async (req, res) => {
+    await Patient.findByIdAndUpdate(
+        req.patient._id,
+        {
+            $set: {
+                refreshToken: undefined
+            }
+        },
+        {
+            new: true
+        }
+    )
+    const options = {
+        httpOnly: true,
+        secure : true
+    }
+
+    return res
+    .status(200)
+    .clearCookie('accessToken', options)
+    .clearCookie('refreshToken', options)
+    .json(
+        new ApiResponse(200,{}, "Patient logged out successfully")
+    )
 
 })
 
 
-export {registerPatient,loginPatient}
+
+export {
+    registerPatient,
+    loginPatient,
+    logoutPatient
+};

@@ -77,20 +77,65 @@ const loginProvider = asyncHandler(async (req, res) => {
         throw new ApiError(401, 'Invalid credentials')
     }
 
-    const accessToken = provider.generateAccessToken()
-    const refreshToken = provider.generateRefreshToken()
 
-    res.cookie('refreshToken', refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict'
-    })
+    const {accessToken, refreshToken} = await generateAccessTokenAndRefreshTokens(provider._id)
+    
+        const loggedInProvider = await Provider.findById(provider._id).select(
+            "-password -refreshToken"
+        )
+    
+    
+        const options = {
+            httpOnly: true,
+            secure : true
+        }
+    
+        return res
+        .status(200)
+        .cookie('accessToken', accessToken, options)
+        .cookie('refreshToken', refreshToken, options)
+        .json(
+            new ApiResponse(
+                200,
+                {
+                    provider: loggedInProvider,
+                    accessToken,
+                    refreshToken
+                },
+                "Provider logged in successfully"
+            )
+        )  
+})
 
-    return res.status(200).json(
-        new ApiResponse(200, {accessToken}, 'Provider logged in successfully')
-    )
-
+const logoutProvider = asyncHandler(async (req, res) => {
+    await Provider.findByIdAndUpdate(
+            req.provider._id,
+            {
+                $set: {
+                    refreshToken: undefined
+                }
+            },
+            {
+                new: true
+            }
+        )
+        const options = {
+            httpOnly: true,
+            secure : true
+        }
+    
+        return res
+        .status(200)
+        .clearCookie('accessToken', options)
+        .clearCookie('refreshToken', options)
+        .json(
+            new ApiResponse(200,{}, "Provider logged out successfully")
+        )
 })
 
 
-export {registerProvider , loginProvider};
+export {
+    registerProvider , 
+    loginProvider,
+    logoutProvider
+};
