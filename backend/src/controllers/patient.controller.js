@@ -3,6 +3,21 @@ import {ApiError} from '../utils/apiError.js';
 import {Patient} from '../models/patient.model.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 
+
+const generateAccessTokenAndRefreshTokens = async(PatientId) => {
+    try {
+        const user = await Patient.findById(PatientId)
+        const accessToken = user.generateAccessToken()
+        const refreshToken = user.generateRefreshToken()
+        user.refreshToken = refreshToken
+        await user.save({validateBeforeSave: false})
+
+        return { accessToken, refreshToken }
+    } catch (error) {
+        throw new ApiError(500, 'Error generating tokens')
+    }
+}
+
 const registerPatient = asyncHandler(async (req, res) => {
     //gets data from the frontend
     //validation - not empty
@@ -12,7 +27,7 @@ const registerPatient = asyncHandler(async (req, res) => {
     //check if patient is created successfully
     //return response to the frontend
 
-    console.log("📦 Received body:", req.body);
+    //console.log("📦 Received body:", req.body);
     const {name, email, password} = req.body || {}
 
 
@@ -47,5 +62,64 @@ const registerPatient = asyncHandler(async (req, res) => {
 })
 
 
+const loginPatient = asyncHandler(async (req, res) => {
+    //req body se data le aao   req body -> data
+    //email based login
+    //find the patient by email
+    //password check
+    //access and refresh token generate
+    //send to cookie
 
-export {registerPatient}
+    const {email, password} = req.body
+
+    if(!email) {
+        throw new ApiError(400, 'Please provide email')
+    }
+    if(!password) {
+        throw new ApiError(400, 'Please provide password')
+    }
+
+    const patient = await Patient.findOne({email})
+
+    if(!patient) {
+        throw new ApiError(404, 'Patient not found')
+    }
+
+    const isPasswordValid = await patient.isPasswordCorrect(password)
+
+    if(!isPasswordValid) {
+        throw new ApiError(401, 'Invalid credentials')
+    }
+
+    const {accessToken, refreshToken} = await generateAccessTokenAndRefreshTokens(patient._id)
+
+    const loggedInPatient = await Patient.findById(patient._id).select(
+        "-password -refreshToken"
+    )
+
+
+    const options = {
+        httpOnly: true,
+        secure : true
+    }
+
+    return res
+    .status(200)
+    .cookie('accessToken', accessToken, options)
+    .cookie('refreshToken', refreshToken, options)
+    .json({
+        new ApiResponse(
+            200,
+            {
+                patient: loggedInPatient,
+                accessToken,
+                refreshToken
+            }
+        )
+    })
+
+
+})
+
+
+export {registerPatient,loginPatient}

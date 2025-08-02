@@ -22,6 +22,7 @@ const providerSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'User', 
     }],
+    refreshToken: {type: String},
     },
     { timestamps: true }
 )

@@ -33,6 +33,7 @@ const patientSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'Provider', 
     }],
+    refreshToken: {type: String},
     },
     {timestamps: true}
 )
