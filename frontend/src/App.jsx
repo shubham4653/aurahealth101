@@ -4,7 +4,7 @@ import { mockPatientData, mockProviderData, mockAdminData } from './data/mockDat
 import MainLayout from './components/layout/MainLayout';
 import { PatientOnboardingForm, ProviderOnboardingForm } from './components/features/Onboarding';
 
-// --- IMPORT ALL YOUR PAGE COMPONENTS ---
+//Page Components
 import AuthPage from './pages/AuthPage';
 import PatientDashboard from './pages/PatientDashboard';
 import ProviderDashboard from './pages/ProviderDashboard';
@@ -13,11 +13,11 @@ import PatientProfilePage from './pages/PatientProfilePage';
 import ProviderProfilePage from './pages/ProviderProfilePage';
 import PatientDetailView from './pages/PatientDetailView';
 import RecordsPage from './pages/RecordsPage';
-import AppointmentsPage from './pages/AppointmentsPage';      // <-- IMPORT THIS
-import CarePlanPage from './pages/CarePlanPage';              // <-- IMPORT THIS
-import PermissionsPage from './pages/PermissionsPage';        // <-- IMPORT THIS
-import SymptomCheckerPage from './pages/SymptomCheckerPage';  // <-- IMPORT THIS
-import AiReportAnalyzer from './components/features/AiAnalyzer'; // <-- IMPORT THIS (Assuming it's a page-level feature)
+import AppointmentsPage from './pages/AppointmentsPage';     
+import CarePlanPage from './pages/CarePlanPage';              
+import PermissionsPage from './pages/PermissionsPage';        
+import SymptomCheckerPage from './pages/SymptomCheckerPage';  
+import AiReportAnalyzer from './components/features/AiAnalyzer';
 
 
 function AppContent() {

@@ -4,7 +4,7 @@ import { generateMockHash } from '../utils/helpers';
 import GlassCard from '../components/ui/GlassCard';
 import AnimatedButton from '../components/ui/AnimatedButton';
 import PatientProfilePage from './PatientProfilePage';
-import PatientDashboard from './PatientDashboard'; // Assuming you refactor PatientDashboard to be reusable
+import PatientDashboard from './PatientDashboard'; 
 
 const SendReportCard = ({ providerName, patientId, theme, onReportSent }) => {
     const [file, setFile] = useState(null);
