@@ -1,37 +1,15 @@
 import React, { useState, useContext } from 'react';
-import {SlidersHorizontal } from 'lucide-react';
+import { SlidersHorizontal } from 'lucide-react';
+import { registerPatient, loginPatient, registerProvider, loginProvider } from '../api/auth';
+
+import { ThemeContext } from '../context/ThemeContext';
+import GlassCard from '../components/ui/GlassCard';
+import AnimatedButton from '../components/ui/AnimatedButton';
 
 
-const ThemeContext = React.createContext({
-    theme: {
-        bg: 'bg-slate-900',
-        text: 'text-slate-100',
-        gradientFrom: 'from-blue-500',
-        gradientTo: 'to-purple-600',
-        secondary: 'bg-slate-800/60',
-        primary: 'bg-blue-600',
-        primaryText: 'text-white',
-        secondaryText: 'text-slate-300',
-        accent: 'border-slate-700',
-    }
-});
 
-// A simple GlassCard component for the effect.
-const GlassCard = ({ children, className }) => (
-    <div className={`bg-slate-800/30 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl p-8 ${className}`}>
-        {children}
-    </div>
-);
 
-// A simple AnimatedButton component.
-const AnimatedButton = ({ children, className, ...props }) => (
-    <button
-        {...props}
-        className={`bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 active:scale-95 transition-all duration-300 shadow-lg hover:shadow-blue-500/50 ${className}`}
-    >
-        {children}
-    </button>
-);
+
 
 
 const AuthPage = ({ onLogin, onSignUp }) => {
@@ -40,18 +18,40 @@ const AuthPage = ({ onLogin, onSignUp }) => {
     const [userType, setUserType] = useState('patient');
     const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Mock login/signup functions
-        if (isLogin) {
-            console.log('Logging in as:', userType, email);
-            if(onLogin) onLogin(userType);
-        } else {
-            console.log('Signing up as:', userType, fullName, email);
-            if(onSignUp) onSignUp(userType, fullName, email);
+
+        try {
+            if (isLogin) {
+                const response = userType === 'patient'
+                    ? await loginPatient({ email, password })
+                    : await loginProvider({ email, password });
+
+                console.log('Login successful:', response);
+                if (onLogin) {
+                    const loggedInUser = userType === 'patient' ? response.data.patient : response.data.provider;
+                    onLogin(loggedInUser, userType);
+                }
+
+            } else {
+                const response = userType === 'patient'
+                    ? await registerPatient({ name: fullName, email, password })
+                    : await registerProvider({ name: fullName, email, password });
+
+
+                console.log('Registration successful:', response);
+                alert('Registration successful! Please log in.');
+                setIsLogin(true);
+            }
+        } catch (error) {
+            console.error('Authentication failed:', error);
+            alert(error.message || 'An error occurred during authentication.');
         }
     };
+
+
 
     return (
         // --- Main container with dark background ---
@@ -107,7 +107,8 @@ const AuthPage = ({ onLogin, onSignUp }) => {
                     <div className="space-y-4">
                         {!isLogin && <input type="text" placeholder="Full Name" value={fullName} onChange={e => setFullName(e.target.value)} className={`w-full p-3 rounded-lg bg-transparent border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${theme.accent} ${theme.text}`} required />}
                         <input type="email" placeholder="Email Address" value={email} onChange={e => setEmail(e.target.value)} className={`w-full p-3 rounded-lg bg-transparent border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${theme.accent} ${theme.text}`} required />
-                        <input type="password" placeholder="Password" className={`w-full p-3 rounded-lg bg-transparent border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${theme.accent} ${theme.text}`} required />
+                        <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} className={`w-full p-3 rounded-lg bg-transparent border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${theme.accent} ${theme.text}`} required />
+
                     </div>
                     <div className="mt-8">
                         <AnimatedButton type="submit" className="w-full">{isLogin ? 'Secure Login' : 'Create Account'}</AnimatedButton>

@@ -1,5 +1,6 @@
 import {asyncHandler} from '../utils/asyncHandler.js';
-import {ApiError} from '../utils/apiError.js';
+import {ApiError} from '../utils/ApiError.js';
+
 import {Patient} from '../models/patient.model.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 
@@ -82,8 +83,9 @@ const loginPatient = asyncHandler(async (req, res) => {
     const patient = await Patient.findOne({email})
 
     if(!patient) {
-        throw new ApiError(404, 'Patient not found')
+        throw new ApiError(401, 'Invalid credentials')
     }
+
 
     const isPasswordValid = await patient.isPasswordCorrect(password)
 
@@ -105,7 +107,6 @@ const loginPatient = asyncHandler(async (req, res) => {
 
     return res
     .status(200)
-    .cookie('accessToken', accessToken, options)
     .cookie('refreshToken', refreshToken, options)
     .json(
         new ApiResponse(
@@ -118,6 +119,7 @@ const loginPatient = asyncHandler(async (req, res) => {
             "Patient logged in successfully"
         )
     )
+
 })
 
 
@@ -140,11 +142,11 @@ const logoutPatient = asyncHandler(async (req, res) => {
 
     return res
     .status(200)
-    .clearCookie('accessToken', options)
     .clearCookie('refreshToken', options)
     .json(
         new ApiResponse(200,{}, "Patient logged out successfully")
     )
+
 
 })
 

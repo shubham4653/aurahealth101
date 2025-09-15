@@ -14,7 +14,8 @@ const providerSchema = new Schema(
         enum: ['Male', 'Female', 'Other']
     },
     specialty: {type: String,trim: true},
-    licenseNumber: {type: String,unique: true,trim: true},
+    licenseNumber: {type: String, unique: true, sparse: true, trim: true},
+
     qualifications: {type: [String],default: [],},
     hospitalAffiliation: {type: String,trim: true,},
     yearsOfExperience: {type: Number,min: 0,default: 0},

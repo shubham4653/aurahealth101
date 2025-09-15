@@ -3,8 +3,10 @@ import { ThemeProvider, ThemeContext } from './context/ThemeContext';
 import { mockPatientData, mockProviderData, mockAdminData } from './data/mockData';
 import MainLayout from './components/layout/MainLayout';
 import { PatientOnboardingForm, ProviderOnboardingForm } from './components/features/Onboarding';
+import { logoutPatient, logoutProvider } from './api/auth';
 
 //Page Components
+
 import AuthPage from './pages/AuthPage';
 import PatientDashboard from './pages/PatientDashboard';
 import ProviderDashboard from './pages/ProviderDashboard';
@@ -40,14 +42,21 @@ function AppContent() {
         };
     }, []);
 
-    const handleLogin = (userType) => {
+    const handleLogin = (loggedInUser, userType) => {
         let userData;
-        if (userType === 'patient') userData = { ...masterPatientData, type: 'patient' };
-        else if (userType === 'provider') userData = { ...mockProviderData, type: 'provider' };
-        else userData = { ...mockAdminData, type: 'admin' };
+        // NOTE: AuthPage must be updated to call onLogin with the user object from the API response,
+        // e.g., onLogin(response.data.patient, 'patient')
+        if (userType === 'patient') {
+            userData = { ...masterPatientData, ...loggedInUser, type: 'patient' };
+        } else if (userType === 'provider') {
+            userData = { ...mockProviderData, ...loggedInUser, type: 'provider' };
+        } else { // admin
+            userData = { ...mockAdminData, type: 'admin' };
+        }
         setUser(userData);
         setCurrentPage('dashboard');
     };
+
 
     const handleSignUp = (userType, name, email) => {
         const newUser = {
@@ -77,12 +86,22 @@ function AppContent() {
         }
     };
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
+        try {
+            if (user?.type === 'patient') {
+                await logoutPatient();
+            } else if (user?.type === 'provider') {
+                await logoutProvider();
+            }
+        } catch (error) {
+            console.error('Logout failed:', error);
+        }
         setUser(null);
         setViewingPatientId(null);
         setNeedsOnboarding(false);
         setCurrentPage('auth');
     };
+
 
     const handleNavigate = (page, data = null) => {
         if (page === 'view-patient') {
