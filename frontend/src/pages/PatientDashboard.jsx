@@ -13,32 +13,47 @@ const VitalSignCard = ({ icon: Icon, label, value, unit, colorClass }) => {
     return (<GlassCard className="flex items-center gap-4"><div className={`p-3 rounded-full ${colorClass}`}><Icon className="w-6 h-6 text-white" /></div><div><p className={`text-sm opacity-80 ${theme.text}`}>{label}</p><p className={`text-2xl font-bold ${theme.text}`}>{value} <span className="text-base font-normal">{unit}</span></p></div></GlassCard>);
 };
 
-const AnalyticsChart = ({ data, theme, title, yKey1, color1, safeRange, warningRange }) => (
-    <GlassCard>
-        <h3 className={`text-xl font-bold mb-4 ${theme.text}`}>{title}</h3>
-        <div style={{ width: '100%', height: 300 }}>
-            <ResponsiveContainer>
-                <AreaChart data={data}>
-                    <defs><linearGradient id={`color${yKey1}`} x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor={color1} stopOpacity={0.8}/><stop offset="95%" stopColor={color1} stopOpacity={0}/></linearGradient></defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke={theme.text} strokeOpacity={0.2} />
-                    <XAxis dataKey="month" stroke={theme.text} tick={{ fill: theme.text, fontSize: 12 }} />
-                    <YAxis stroke={theme.text} tick={{ fill: theme.text, fontSize: 12 }} />
-                    <Tooltip contentStyle={{ backgroundColor: theme.glass, border: 'none', color: theme.text }} />
-                    <Legend wrapperStyle={{color: theme.text}}/>
-                    <ReferenceArea y1={warningRange[1]} y2={300} fill="red" fillOpacity={0.1} label={{ value: 'Danger', position: 'insideTopRight', fill: 'red', fontSize: 10 }} />
-                    <ReferenceArea y1={safeRange[1]} y2={warningRange[1]} fill="yellow" fillOpacity={0.1} label={{ value: 'Warning', position: 'insideTopRight', fill: 'yellow', fontSize: 10 }}/>
-                    <ReferenceArea y1={safeRange[0]} y2={safeRange[1]} fill="green" fillOpacity={0.1} label={{ value: 'Safe', position: 'insideTopRight', fill: 'green', fontSize: 10 }}/>
-                    <Area type="monotone" dataKey={yKey1} stroke={color1} fillOpacity={1} fill={`url(#color${yKey1})`} name={yKey1.replace(/([A-Z])/g, ' $1').trim()} />
-                </AreaChart>
-            </ResponsiveContainer>
-        </div>
-    </GlassCard>
-);
+const AnalyticsChart = ({ data, theme, title, yKey1, color1, safeRange, warningRange }) => {
+    // Provide fallback for undefined data
+    const safeData = data || [];
+    
+    return (
+        <GlassCard>
+            <h3 className={`text-xl font-bold mb-4 ${theme.text}`}>{title}</h3>
+            <div style={{ width: '100%', height: 300 }}>
+                {safeData.length > 0 ? (
+                    <ResponsiveContainer>
+                        <AreaChart data={safeData}>
+                            <defs><linearGradient id={`color${yKey1}`} x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor={color1} stopOpacity={0.8}/><stop offset="95%" stopColor={color1} stopOpacity={0}/></linearGradient></defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke={theme.text} strokeOpacity={0.2} />
+                            <XAxis dataKey="month" stroke={theme.text} tick={{ fill: theme.text, fontSize: 12 }} />
+                            <YAxis stroke={theme.text} tick={{ fill: theme.text, fontSize: 12 }} />
+                            <Tooltip contentStyle={{ backgroundColor: theme.glass, border: 'none', color: theme.text }} />
+                            <Legend wrapperStyle={{color: theme.text}}/>
+                            <ReferenceArea y1={warningRange[1]} y2={300} fill="red" fillOpacity={0.1} label={{ value: 'Danger', position: 'insideTopRight', fill: 'red', fontSize: 10 }} />
+                            <ReferenceArea y1={safeRange[1]} y2={warningRange[1]} fill="yellow" fillOpacity={0.1} label={{ value: 'Warning', position: 'insideTopRight', fill: 'yellow', fontSize: 10 }}/>
+                            <ReferenceArea y1={safeRange[0]} y2={safeRange[1]} fill="green" fillOpacity={0.1} label={{ value: 'Safe', position: 'insideTopRight', fill: 'green', fontSize: 10 }}/>
+                            <Area type="monotone" dataKey={yKey1} stroke={color1} fillOpacity={1} fill={`url(#color${yKey1})`} name={yKey1.replace(/([A-Z])/g, ' $1').trim()} />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                ) : (
+                    <div className={`flex items-center justify-center h-full opacity-60 ${theme.text}`}>
+                        <p>No chart data available</p>
+                    </div>
+                )}
+            </div>
+        </GlassCard>
+    );
+};
 
 const RecentActivity = ({ activities, theme }) => {
     const [wearableStatus, setWearableStatus] = useState('Not Connected');
     const handleConnect = () => { setWearableStatus('Connecting...'); setTimeout(() => { setWearableStatus('Connected'); }, 2000); };
-    return (<GlassCard><div className="flex justify-between items-center mb-4"><h3 className={`text-xl font-bold ${theme.text}`}>Recent Activity</h3><AnimatedButton onClick={handleConnect} icon={Watch} className="text-sm px-4 py-2" disabled={wearableStatus !== 'Not Connected'}>{wearableStatus}</AnimatedButton></div><div className="space-y-4">{activities.map(activity => (<div key={activity.id} className="flex items-start gap-3"><div className={`p-2 rounded-full mt-1 ${theme.primary} ${theme.primaryText}`}><FileText size={16} /></div><div><p className={`font-semibold ${theme.text}`}>{activity.type}</p><p className={`text-sm opacity-80 ${theme.text}`}>{activity.description}</p><p className={`text-xs opacity-60 ${theme.text}`}>{activity.date}</p></div></div>))}</div></GlassCard>);
+    
+    // Provide fallback for undefined activities
+    const safeActivities = activities || [];
+    
+    return (<GlassCard><div className="flex justify-between items-center mb-4"><h3 className={`text-xl font-bold ${theme.text}`}>Recent Activity</h3><AnimatedButton onClick={handleConnect} icon={Watch} className="text-sm px-4 py-2" disabled={wearableStatus !== 'Not Connected'}>{wearableStatus}</AnimatedButton></div><div className="space-y-4">{safeActivities.length > 0 ? safeActivities.map(activity => (<div key={activity.id} className="flex items-start gap-3"><div className={`p-2 rounded-full mt-1 ${theme.primary} ${theme.primaryText}`}><FileText size={16} /></div><div><p className={`font-semibold ${theme.text}`}>{activity.type}</p><p className={`text-sm opacity-80 ${theme.text}`}>{activity.description}</p><p className={`text-xs opacity-60 ${theme.text}`}>{activity.date}</p></div></div>)) : (<div className={`text-center py-8 opacity-60 ${theme.text}`}><p>No recent activity to display</p></div>)}</div></GlassCard>);
 };
 
 const AIWellnessCoach = ({ user, theme }) => {
@@ -73,7 +88,8 @@ const AIWellnessCoach = ({ user, theme }) => {
 
 const PatientDashboard = ({ user, isViewOnly=false }) => {
     const { theme } = useContext(ThemeContext);
-    const analytics = user.analytics;
+    const analytics = user?.analytics || {};
+    const vitals = analytics?.vitals || {};
 
     return (
         <div className="p-6 space-y-6">
@@ -86,10 +102,10 @@ const PatientDashboard = ({ user, isViewOnly=false }) => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
                 <div className="sm:col-span-2 lg:col-span-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <VitalSignCard icon={Heart} label="Heart Rate" value={analytics.vitals.heartRate} unit="bpm" colorClass="bg-red-500" />
-                        <VitalSignCard icon={Activity} label="Blood Pressure" value={analytics.vitals.bloodPressure} unit="mmHg" colorClass="bg-blue-500" />
-                        <VitalSignCard icon={Droplets} label="Blood Sugar" value={analytics.vitals.bloodSugar} unit="mg/dL" colorClass="bg-yellow-500" />
-                        <VitalSignCard icon={Footprints} label="Steps Today" value={analytics.vitals.steps.toLocaleString()} unit="steps" colorClass="bg-green-500" />
+                        <VitalSignCard icon={Heart} label="Heart Rate" value={vitals.heartRate} unit="bpm" colorClass="bg-red-500" />
+                        <VitalSignCard icon={Activity} label="Blood Pressure" value={vitals.bloodPressure} unit="mmHg" colorClass="bg-blue-500" />
+                        <VitalSignCard icon={Droplets} label="Blood Sugar" value={vitals.bloodSugar} unit="mg/dL" colorClass="bg-yellow-500" />
+                        <VitalSignCard icon={Footprints} label="Steps Today" value={vitals.steps?.toLocaleString()} unit="steps" colorClass="bg-green-500" />
                     </div>
                 </div>
                 {!isViewOnly && <AIWellnessCoach user={user} theme={theme} />}

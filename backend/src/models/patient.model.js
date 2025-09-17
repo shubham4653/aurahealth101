@@ -20,7 +20,8 @@ const patientSchema = new Schema(
         type: String, 
         enum: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
     },
-    contact: {type: Number},
+    contact: {type: String},
+
     address: {type: String},
     chroniccondition: {type: [String], default: []},
     allergies: {type: [String], default: []},

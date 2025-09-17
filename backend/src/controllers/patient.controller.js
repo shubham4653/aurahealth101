@@ -151,9 +151,90 @@ const logoutPatient = asyncHandler(async (req, res) => {
 })
 
 
+const updatePatientProfile = asyncHandler(async (req, res) => {
+    // Destructure all possible fields from the body
+    const { name, phone, age, address, gender, bloodGroup, allergies, chronicConditions, emergencyContact } = req.body;
+
+    // Build an update object with only the provided fields
+    const updateFields = {};
+    if (name) updateFields.name = name;
+    if (phone) updateFields.contact = phone;
+    if (age) updateFields.age = age;
+    if (address) updateFields.address = address;
+
+
+    if (gender) updateFields.gender = gender;
+    if (bloodGroup) updateFields.bloodgroup = bloodGroup;
+    if (allergies) updateFields.allergies = allergies;
+    if (chronicConditions) updateFields.chroniccondition = chronicConditions;
+    if (emergencyContact) updateFields.emergencyContact = emergencyContact;
+
+
+    // Check if there's anything to update
+    if (Object.keys(updateFields).length === 0) {
+        throw new ApiError(400, "No update data provided.");
+    }
+
+    const patient = await Patient.findByIdAndUpdate(
+        req.patient._id,
+        { $set: updateFields },
+        { new: true, runValidators: true }
+    ).select("-password -refreshToken");
+
+    if (!patient) {
+        throw new ApiError(404, "Patient not found.");
+    }
+
+    // Map database field names to frontend-expected field names
+    const mappedPatient = {
+        ...patient.toObject(),
+        phone: patient.contact, // Map contact to phone
+        bloodGroup: patient.bloodgroup, // Map bloodgroup to bloodGroup
+        chronicConditions: patient.chroniccondition, // Map chroniccondition to chronicConditions
+    };
+
+    // Remove the original database field names to avoid confusion
+    delete mappedPatient.contact;
+    delete mappedPatient.bloodgroup;
+    delete mappedPatient.chroniccondition;
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, mappedPatient, "Profile updated successfully."));
+});
+
+
+const getPatientProfile = asyncHandler(async (req, res) => {
+    // The patient's data is attached to the request by the verifyJWTPatient middleware
+    const patient = await Patient.findById(req.patient._id).select("-password -refreshToken");
+
+    if (!patient) {
+        throw new ApiError(404, "Patient not found.");
+    }
+
+    // Map database field names to frontend-expected field names
+    const mappedPatient = {
+        ...patient.toObject(),
+        phone: patient.contact, // Map contact to phone
+        bloodGroup: patient.bloodgroup, // Map bloodgroup to bloodGroup
+        chronicConditions: patient.chroniccondition, // Map chroniccondition to chronicConditions
+    };
+
+    // Remove the original database field names to avoid confusion
+    delete mappedPatient.contact;
+    delete mappedPatient.bloodgroup;
+    delete mappedPatient.chroniccondition;
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, mappedPatient, "Patient profile fetched successfully."));
+});
+
 
 export {
     registerPatient,
     loginPatient,
-    logoutPatient
+    logoutPatient,
+    updatePatientProfile,
+    getPatientProfile
 };

@@ -3,7 +3,8 @@ import { ThemeProvider, ThemeContext } from './context/ThemeContext';
 import { mockPatientData, mockProviderData, mockAdminData } from './data/mockData';
 import MainLayout from './components/layout/MainLayout';
 import { PatientOnboardingForm, ProviderOnboardingForm } from './components/features/Onboarding';
-import { logoutPatient, logoutProvider } from './api/auth';
+import { logoutPatient, logoutProvider, getPatientProfile } from './api/auth';
+
 
 //Page Components
 
@@ -42,12 +43,25 @@ function AppContent() {
         };
     }, []);
 
-    const handleLogin = (loggedInUser, userType) => {
+    const handleLogin = async (loggedInUser, userType) => {
         let userData;
-        // NOTE: AuthPage must be updated to call onLogin with the user object from the API response,
-        // e.g., onLogin(response.data.patient, 'patient')
         if (userType === 'patient') {
-            userData = { ...masterPatientData, ...loggedInUser, type: 'patient' };
+            try {
+                // After login, the token is set. Now fetch the full profile.
+                const profileRes = await getPatientProfile();
+                if (profileRes.success) {
+                    // Combine the fetched data with the necessary user type for the frontend.
+                    userData = { ...profileRes.data, type: 'patient' };
+                    setMasterPatientData(prev => ({ ...prev, ...userData }));
+                } else {
+                    // Fallback to mock data if fetch fails, and log an error.
+                    console.error("Failed to fetch patient profile:", profileRes.message);
+                    userData = { ...masterPatientData, ...loggedInUser, type: 'patient' };
+                }
+            } catch (error) {
+                console.error("Error fetching patient profile:", error);
+                userData = { ...masterPatientData, ...loggedInUser, type: 'patient' };
+            }
         } else if (userType === 'provider') {
             userData = { ...mockProviderData, ...loggedInUser, type: 'provider' };
         } else { // admin
@@ -56,6 +70,7 @@ function AppContent() {
         setUser(userData);
         setCurrentPage('dashboard');
     };
+
 
 
     const handleSignUp = (userType, name, email) => {
@@ -85,6 +100,24 @@ function AppContent() {
             setUser(updatedPatient);
         }
     };
+
+    const refetchPatientData = async () => {
+        if (user?.type === 'patient') {
+            try {
+                const profileRes = await getPatientProfile();
+                if (profileRes.success) {
+                    const updatedUserData = { ...user, ...profileRes.data };
+                    setUser(updatedUserData);
+                    if (masterPatientData.id === updatedUserData.id) {
+                        setMasterPatientData(prev => ({ ...prev, ...updatedUserData }));
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to refetch patient data:", error);
+            }
+        }
+    };
+
 
     const handleLogout = async () => {
         try {
@@ -128,7 +161,8 @@ function AppContent() {
             return <PatientDetailView patient={patientDataForView} providerName={user.name} onBack={() => setViewingPatientId(null)} theme={theme} onUpdatePatient={handleUpdatePatientData} />;
         }
 
-        const currentUser = user.type === 'patient' ? { ...masterPatientData, type: 'patient' } : user;
+        const currentUser = user;
+
 
         let pageComponent;
         switch (currentPage) {
@@ -138,8 +172,11 @@ function AppContent() {
                 else if (currentUser.type === 'admin') pageComponent = <AdminDashboard user={currentUser} />;
                 break;
             case 'profile':
-                pageComponent = currentUser.type === 'patient' ? <PatientProfilePage user={currentUser} /> : <ProviderProfilePage user={currentUser} />;
+                pageComponent = currentUser.type === 'patient' ? <PatientProfilePage user={currentUser} onUpdatePatientData={refetchPatientData} /> : <ProviderProfilePage user={currentUser} />;
                 break;
+
+
+
             
             // --- ADD THE CASES FOR YOUR NEW PAGES HERE ---
             case 'appointments':

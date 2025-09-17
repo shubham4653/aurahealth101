@@ -1,10 +1,12 @@
 import React, { useState, useContext } from 'react';
-import { SlidersHorizontal } from 'lucide-react';
+import { SlidersHorizontal, User, Mail, Lock } from 'lucide-react';
 import { registerPatient, loginPatient, registerProvider, loginProvider } from '../api/auth';
 
 import { ThemeContext } from '../context/ThemeContext';
 import GlassCard from '../components/ui/GlassCard';
 import AnimatedButton from '../components/ui/AnimatedButton';
+import FormInput from '../components/ui/FormInput';
+
 
 
 
@@ -105,12 +107,12 @@ const AuthPage = ({ onLogin, onSignUp }) => {
                 </div>
                 <form onSubmit={handleSubmit}>
                     <div className="space-y-4">
-                        {!isLogin && <input type="text" placeholder="Full Name" value={fullName} onChange={e => setFullName(e.target.value)} className={`w-full p-3 rounded-lg bg-transparent border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${theme.accent} ${theme.text}`} required />}
-                        <input type="email" placeholder="Email Address" value={email} onChange={e => setEmail(e.target.value)} className={`w-full p-3 rounded-lg bg-transparent border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${theme.accent} ${theme.text}`} required />
-                        <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} className={`w-full p-3 rounded-lg bg-transparent border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${theme.accent} ${theme.text}`} required />
-
+                        {!isLogin && <FormInput icon={User} type="text" placeholder="Full Name" value={fullName} onChange={e => setFullName(e.target.value)} theme={theme} />}
+                        <FormInput icon={Mail} type="email" placeholder="Email Address" value={email} onChange={e => setEmail(e.target.value)} theme={theme} />
+                        <FormInput icon={Lock} type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} theme={theme} />
                     </div>
                     <div className="mt-8">
+
                         <AnimatedButton type="submit" className="w-full">{isLogin ? 'Secure Login' : 'Create Account'}</AnimatedButton>
                     </div>
                 </form>

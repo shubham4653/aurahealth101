@@ -74,7 +74,33 @@ export const logoutPatient = async () => {
     }
 };
 
+export const updatePatientProfile = async (profileData) => {
+    try {
+        // We use the 'api' instance which has an interceptor to add the auth token.
+        // We also add withCredentials to handle any CORS-related cookie requirements.
+        const response = await api.post('/patient/update-profile', profileData, { withCredentials: true });
+
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { message: 'Profile update failed' };
+    }
+};
+
+
+export const getPatientProfile = async () => {
+    try {
+        const response = await api.get('/patient/profile');
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { message: 'Failed to fetch profile' };
+    }
+};
+
+
+
 export const logoutProvider = async () => {
+
+
     try {
         const response = await api.post(`/provider/logout`);
         localStorage.removeItem('accessToken');
