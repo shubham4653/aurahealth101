@@ -147,9 +147,55 @@ const logoutProvider = asyncHandler(async (req, res) => {
 
 })
 
+const getAllProviders = asyncHandler(async (req, res) => {
+    const providers = await Provider.find({}).select('name specialty');
+    return res
+        .status(200)
+        .json(new ApiResponse(200, providers, 'Providers fetched successfully'));
+});
+
+
+
+
+const updateProviderProfile = asyncHandler(async (req, res) => {
+    const { name, specialty, qualifications, licenseNumber, yearsOfExperience, age, gender } = req.body;
+    const updateFields = {};
+    if (name) updateFields.name = name;
+    if (specialty) updateFields.specialty = specialty;
+    if (qualifications) updateFields.qualifications = qualifications;
+    if (licenseNumber) updateFields.licenseNumber = licenseNumber;
+    if (yearsOfExperience) updateFields.yearsOfExperience = yearsOfExperience;
+    if (age) updateFields.age = age
+    if (gender) updateFields.gender = gender;
+
+   
+    // Filter out undefined fields to avoid overwriting with null
+    // Object.keys(updateFields).forEach(key => updateFields[key] === undefined && delete updateFields[key]);
+
+    if (Object.keys(updateFields).length === 0) {
+        throw new ApiError(400, "No fields to update provided");
+    }
+
+    const provider = await Provider.findByIdAndUpdate(
+        req.provider._id,
+        { $set: updateFields },
+        { new: true, runValidators: true }
+    ).select("-password -refreshToken");
+
+    if (!provider) {
+        throw new ApiError(404, "Provider not found");
+    }
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, provider, "Provider profile updated successfully"));
+});
+
 
 export {
     registerProvider , 
     loginProvider,
-    logoutProvider
+    logoutProvider,
+    getAllProviders,
+    updateProviderProfile
 };

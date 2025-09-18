@@ -74,17 +74,7 @@ export const logoutPatient = async () => {
     }
 };
 
-export const updatePatientProfile = async (profileData) => {
-    try {
-        // We use the 'api' instance which has an interceptor to add the auth token.
-        // We also add withCredentials to handle any CORS-related cookie requirements.
-        const response = await api.post('/patient/update-profile', profileData, { withCredentials: true });
 
-        return response.data;
-    } catch (error) {
-        throw error.response?.data || { message: 'Profile update failed' };
-    }
-};
 
 
 export const getPatientProfile = async () => {
@@ -99,10 +89,8 @@ export const getPatientProfile = async () => {
 
 
 export const logoutProvider = async () => {
-
-
     try {
-        const response = await api.post(`/provider/logout`);
+        const response = await api.post('/provider/logout');
         localStorage.removeItem('accessToken');
         return response.data;
     } catch (error) {
@@ -110,3 +98,24 @@ export const logoutProvider = async () => {
         throw error.response?.data || { message: 'Logout failed' };
     }
 };
+
+export const updatePatientProfile = async (profileData) => {
+    try {
+        // We use the 'api' instance which has an interceptor to add the auth token.
+        // We also add withCredentials to handle any CORS-related cookie requirements.
+        const response = await api.post('/patient/update-profile', profileData, { withCredentials: true });
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { message: 'Failed to update profile' };
+    }
+};
+
+export const updateProviderProfile = async (profileData) => {
+    try {
+        const response = await api.post('/provider/update-profile', profileData, { withCredentials: true });
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { message: 'Failed to update profile' };
+    }
+};
+

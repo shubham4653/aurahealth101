@@ -7,12 +7,6 @@ import GlassCard from '../components/ui/GlassCard';
 import AnimatedButton from '../components/ui/AnimatedButton';
 import FormInput from '../components/ui/FormInput';
 
-// A page component for user authentication (login and signup)
-
-
-
-
-
 
 const AuthPage = ({ onLogin, onSignUp }) => {
     const { theme } = useContext(ThemeContext);

@@ -6,9 +6,14 @@ import cors from 'cors';
 //routes import
 import patientRoutes from './routes/patient.routes.js'
 import providerRoutes from './routes/provider.routes.js';
+import appointmentRoutes from './routes/appointment.routes.js';
 
 const app = express();
 
+app.use((req, res, next) => {
+    console.log(`Incoming request: ${req.method} ${req.url}`);
+    next();
+});
 
 app.use(cors({
     origin: 'http://localhost:5173',
@@ -16,6 +21,12 @@ app.use(cors({
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Add a generic logging middleware to catch all requests
+app.use((req, res, next) => {
+    console.log(`[DEBUG] Request received: ${req.method} ${req.originalUrl}`);
+    next();
+});
 
 
 
@@ -25,12 +36,18 @@ app.use(express.static('public'))
 app.use(cookieParser())
 
 
-// Simple test route
-app.post('/api/v1/test', (req, res) => {
-  console.log('--- TEST ROUTE HIT ---');
-  console.log('Body:', req.body);
-  res.status(200).json({ message: 'Test route is working!' });
-});
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // app.post('/debug', (req, res) => {
@@ -47,6 +64,7 @@ app.post('/api/v1/test', (req, res) => {
 //routes declaration
 app.use('/api/v1/patient', patientRoutes);
 app.use('/api/v1/provider', providerRoutes);
+app.use('/api/v1/appointment', appointmentRoutes);
 
 
 

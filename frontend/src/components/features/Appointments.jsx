@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import GlassCard from '../ui/GlassCard.jsx';
 import AnimatedButton from '../ui/AnimatedButton.jsx';
+import { getAllProviders } from '../../api/appointments.js';
 
 // The list of upcoming appointments
-export const AppointmentList = ({ appointments, theme }) => (
+export const AppointmentList = ({ appointments = [], theme }) => (
     <GlassCard>
         <h3 className={`text-xl font-bold mb-4 ${theme.text}`}>Upcoming Appointments</h3>
         <div className="space-y-3">
@@ -30,17 +31,30 @@ export const AppointmentList = ({ appointments, theme }) => (
 
 // The scheduler modal component
 export const AppointmentScheduler = ({ user, theme, onSchedule, onClose }) => {
-    const [selectedProvider, setSelectedProvider] = useState(user.providers[0]?.id || '');
+    const [allProviders, setAllProviders] = useState([]);
+    const [selectedProvider, setSelectedProvider] = useState('');
     const [selectedDate, setSelectedDate] = useState('');
     const [selectedTime, setSelectedTime] = useState('');
     const [reason, setReason] = useState('');
     const timeSlots = ["09:00 AM", "10:00 AM", "11:00 AM", "02:00 PM", "03:00 PM", "04:00 PM"];
 
+    useEffect(() => {
+        const fetchProviders = async () => {
+            const res = await getAllProviders();
+            if (res.success) {
+                setAllProviders(res.data);
+                if (res.data.length > 0) {
+                    setSelectedProvider(res.data[0]._id);
+                }
+            }
+        };
+        fetchProviders();
+    }, []);
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        const provider = user.providers.find(p => p.id === selectedProvider);
         onSchedule({
-            providerName: provider.name,
+            providerId: selectedProvider,
             date: selectedDate,
             time: selectedTime,
             reason: reason || "Consultation"
@@ -62,7 +76,7 @@ export const AppointmentScheduler = ({ user, theme, onSchedule, onClose }) => {
                         <label className={`block mb-2 font-semibold ${theme.text}`}>Select Provider</label>
                         <select value={selectedProvider} onChange={e => setSelectedProvider(e.target.value)} className={`w-full p-3 rounded-lg bg-transparent border-2 ${theme.accent} ${theme.text} focus:outline-none focus:ring-2 focus:ring-blue-500`}>
                             <option value="" disabled className={`${theme.bg}`}>Select a provider</option>
-                            {user.providers.map(p => <option key={p.id} value={p.id} className={`${theme.bg}`}>{p.name} - {p.specialty}</option>)}
+                            {allProviders.map(p => <option key={p._id} value={p._id} className={`${theme.bg}`}>{p.name} - {p.specialty || 'General Practice'}</option>)}
                         </select>
                     </div>
                     <div>

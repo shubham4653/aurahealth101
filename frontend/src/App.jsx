@@ -51,8 +51,9 @@ function AppContent() {
                 const profileRes = await getPatientProfile();
                 if (profileRes.success) {
                     // Combine the fetched data with the necessary user type for the frontend.
-                    userData = { ...profileRes.data, type: 'patient' };
+                    userData = { ...masterPatientData, ...profileRes.data, type: 'patient' };
                     setMasterPatientData(prev => ({ ...prev, ...userData }));
+
                 } else {
                     // Fallback to mock data if fetch fails, and log an error.
                     console.error("Failed to fetch patient profile:", profileRes.message);

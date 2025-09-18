@@ -11,7 +11,6 @@ router.route('/login').post(loginPatient)
 
 //secured routes
 router.route("/logout").post(verifyJWTPatient,logoutPatient)
-console.log("Registering /update-profile POST route");
 router.route("/update-profile").post(verifyJWTPatient, updatePatientProfile)
 router.route("/profile").get(verifyJWTPatient, getPatientProfile)
 

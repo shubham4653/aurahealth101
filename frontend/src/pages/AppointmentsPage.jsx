@@ -1,17 +1,47 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { CalendarPlus } from 'lucide-react';
 import { ThemeContext } from '../context/ThemeContext.jsx';
 import { AppointmentList, AppointmentScheduler } from '../components/features/Appointments.jsx';
 import AnimatedButton from '../components/ui/AnimatedButton.jsx';
+import { getPatientAppointments, scheduleAppointment } from '../api/appointments.js';
 
-const AppointmentsPage = ({ user, onUpdateAppointments }) => {
+const AppointmentsPage = ({ user }) => {
     const { theme } = useContext(ThemeContext);
     const [showScheduler, setShowScheduler] = useState(false);
+    const [appointments, setAppointments] = useState([]);
 
-    const handleSchedule = (newAppointment) => {
-        const updatedAppointments = [...user.appointments, { ...newAppointment, id: Date.now() }];
-        onUpdateAppointments(updatedAppointments);
-        setShowScheduler(false);
+    const fetchAppointments = async () => {
+        const res = await getPatientAppointments();
+        if (res.success) {
+            const formattedAppointments = res.data.map(apt => ({
+                id: apt._id,
+                providerName: apt.providerId.name,
+                date: new Date(apt.appointmentDate).toLocaleDateString(),
+                time: apt.time,
+                reason: apt.reason,
+            }));
+            setAppointments(formattedAppointments);
+        }
+    };
+
+    useEffect(() => {
+        fetchAppointments();
+    }, []);
+
+    const handleSchedule = async (appointmentData) => {
+        const response = await scheduleAppointment({
+            providerId: appointmentData.providerId,
+            appointmentDate: appointmentData.date,
+            time: appointmentData.time,
+            reason: appointmentData.reason,
+        });
+
+        if (response.success) {
+            fetchAppointments();
+            setShowScheduler(false);
+        } else {
+            console.error('Failed to schedule appointment:', response.message);
+        }
     };
 
     return (
@@ -23,7 +53,7 @@ const AppointmentsPage = ({ user, onUpdateAppointments }) => {
                 </AnimatedButton>
             </div>
 
-            <AppointmentList appointments={user.appointments} theme={theme} />
+            <AppointmentList appointments={appointments} theme={theme} />
 
             {showScheduler && (
                 <AppointmentScheduler

@@ -161,8 +161,6 @@ const updatePatientProfile = asyncHandler(async (req, res) => {
     if (phone) updateFields.contact = phone;
     if (age) updateFields.age = age;
     if (address) updateFields.address = address;
-
-
     if (gender) updateFields.gender = gender;
     if (bloodGroup) updateFields.bloodgroup = bloodGroup;
     if (allergies) updateFields.allergies = allergies;
