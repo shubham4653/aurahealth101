@@ -119,6 +119,25 @@ function AppContent() {
         }
     };
 
+    const refetchProviderData = async () => {
+        if (user?.type === 'provider') {
+            try {
+                const profileRes = await getProviderProfile();
+                if (profileRes.success) {
+                    const updatedUserData = { ...user, ...profileRes.data };
+                    setUser(updatedUserData);
+                    if (masterPatientData.id === updatedUserData.id) {
+                        setMasterProviderData(prev => ({ ...prev, ...updatedUserData }));
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to refetch provider data:", error);
+            }
+        }
+    };
+
+
+
 
     const handleLogout = async () => {
         try {
@@ -173,12 +192,8 @@ function AppContent() {
                 else if (currentUser.type === 'admin') pageComponent = <AdminDashboard user={currentUser} />;
                 break;
             case 'profile':
-                pageComponent = currentUser.type === 'patient' ? <PatientProfilePage user={currentUser} onUpdatePatientData={refetchPatientData} /> : <ProviderProfilePage user={currentUser} />;
+                pageComponent = currentUser.type === 'patient' ? <PatientProfilePage user={currentUser} onUpdatePatientData={refetchPatientData} /> : <ProviderProfilePage user={currentUser} onUpdateProviderData={refetchPatientData} />;
                 break;
-
-
-
-            
             // --- ADD THE CASES FOR YOUR NEW PAGES HERE ---
             case 'appointments':
                 pageComponent = <AppointmentsPage user={currentUser} onUpdateAppointments={(newApts) => handleUpdatePatientData({ ...currentUser, appointments: newApts })} />;

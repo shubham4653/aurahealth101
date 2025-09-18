@@ -107,15 +107,12 @@ const PatientProfilePage = ({ user, onUpdatePatientData, isViewOnly = false }) =
         if (dataToSave.emergencyContact?.phone) {
             dataToSave.emergencyContact.phone = String(dataToSave.emergencyContact.phone).replace(/\D/g, '');
         }
-
-
         try {
 
             const result = await updatePatientProfile(dataToSave);
 
             setSuccess(result.message || "Profile updated successfully!");
 
-            
             if (onUpdatePatientData) {
                 await onUpdatePatientData(); // This now triggers a refetch in the parent component
             }

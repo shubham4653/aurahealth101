@@ -1,14 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Settings, Award, GraduationCap, FileText, Save, X, User, Calendar, Users } from 'lucide-react';
-
-
 import { ThemeContext } from '../context/ThemeContext';
 import GlassCard from '../components/ui/GlassCard';
 import AnimatedButton from '../components/ui/AnimatedButton';
 import FormInput from '../components/ui/FormInput';
 import { updateProviderProfile } from '../api/auth';
 
-const ProviderProfilePage = ({ user, onUpdateUserData }) => {
+const ProviderProfilePage = ({ user, onUpdateProviderData }) => {
     const { theme } = useContext(ThemeContext);
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({ ...user });
@@ -53,8 +51,8 @@ const ProviderProfilePage = ({ user, onUpdateUserData }) => {
         try {
             const result = await updateProviderProfile(dataToSave);
             setSuccess(result.message || "Profile updated successfully!");
-            if (onUpdateUserData) {
-                await onUpdateUserData();
+            if (onUpdateProviderData) {
+                await onUpdateProviderData();
             }
             setIsEditing(false);
         } catch (err) {

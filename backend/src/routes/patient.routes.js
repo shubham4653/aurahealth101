@@ -3,8 +3,6 @@ import { registerPatient, loginPatient, logoutPatient, updatePatientProfile, get
 import { verifyJWTPatient } from '../middlewares/authPatient.middleware.js';
 
 
-
-
 const router = Router();
 router.route('/register').post(registerPatient)
 router.route('/login').post(loginPatient)

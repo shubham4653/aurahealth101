@@ -94,30 +94,30 @@ const loginProvider = asyncHandler(async (req, res) => {
 
     const {accessToken, refreshToken} = await generateAccessTokenAndRefreshTokens(provider._id)
     
-        const loggedInProvider = await Provider.findById(provider._id).select(
-            "-password -refreshToken"
+    // Fetch the latest provider profile after login
+    const loggedInProvider = await Provider.findById(provider._id).select(
+        "-password -refreshToken"
+    )
+    
+    const options = {
+        httpOnly: true,
+        secure : true
+    }
+    
+    return res
+    .status(200)
+    .cookie('refreshToken', refreshToken, options)
+    .json(
+        new ApiResponse(
+            200,
+            {
+                provider: loggedInProvider,
+                accessToken,
+                refreshToken
+            },
+            "Provider logged in successfully"
         )
-    
-    
-        const options = {
-            httpOnly: true,
-            secure : true
-        }
-    
-        return res
-        .status(200)
-        .cookie('refreshToken', refreshToken, options)
-        .json(
-            new ApiResponse(
-                200,
-                {
-                    provider: loggedInProvider,
-                    accessToken,
-                    refreshToken
-                },
-                "Provider logged in successfully"
-            )
-        )  
+    )  
 
 })
 
@@ -165,7 +165,7 @@ const updateProviderProfile = asyncHandler(async (req, res) => {
     if (qualifications) updateFields.qualifications = qualifications;
     if (licenseNumber) updateFields.licenseNumber = licenseNumber;
     if (yearsOfExperience) updateFields.yearsOfExperience = yearsOfExperience;
-    if (age) updateFields.age = age
+    if (age) updateFields.age = age;
     if (gender) updateFields.gender = gender;
 
    
@@ -176,11 +176,14 @@ const updateProviderProfile = asyncHandler(async (req, res) => {
         throw new ApiError(400, "No fields to update provided");
     }
 
-    const provider = await Provider.findByIdAndUpdate(
+    await Provider.findByIdAndUpdate(
         req.provider._id,
         { $set: updateFields },
         { new: true, runValidators: true }
-    ).select("-password -refreshToken");
+    );
+
+    // Fetch the updated provider profile
+    const provider = await Provider.findById(req.provider._id).select("-password -refreshToken");
 
     if (!provider) {
         throw new ApiError(404, "Provider not found");
@@ -192,10 +195,22 @@ const updateProviderProfile = asyncHandler(async (req, res) => {
 });
 
 
+const getProviderProfile = asyncHandler(async (req, res) => {
+    const provider = await Provider.findById(req.provider._id).select("-password -refreshToken");
+
+    if (!provider) {
+        throw new ApiError(404, "Provider not found.");
+    }
+    return res
+        .status(200)
+        .json(new ApiResponse(200, provider, "Provider profile fetched successfully."));
+});
+
 export {
     registerProvider , 
     loginProvider,
     logoutProvider,
     getAllProviders,
-    updateProviderProfile
+    updateProviderProfile,
+    getProviderProfile,
 };

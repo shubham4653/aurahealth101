@@ -1,11 +1,5 @@
 import {Router} from 'express';
-import { 
-    registerProvider,
-    loginProvider,
-    logoutProvider,
-    getAllProviders,
-    updateProviderProfile
-} from '../controllers/provider.controller.js';
+import { registerProvider,loginProvider,logoutProvider,getAllProviders,updateProviderProfile,getProviderProfile,} from '../controllers/provider.controller.js';
 import { verifyJWTProvider } from '../middlewares/authProvider.middleware.js';
 
 
@@ -17,7 +11,7 @@ router.route('/all').get(getAllProviders)
 //secured routes
 router.route("/logout").post(verifyJWTProvider, logoutProvider)
 router.route("/update-profile").post(verifyJWTProvider, updateProviderProfile)
-
+router.route("/profile").get(verifyJWTProvider, getProviderProfile)
 
 
 export default router
