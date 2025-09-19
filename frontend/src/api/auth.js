@@ -127,3 +127,4 @@ export const updateProviderProfile = async (profileData) => {
     }
 };
 
+export { api };

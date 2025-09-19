@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { Loader2, Send, ClipboardPlus, Pill } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Loader2, Send, ClipboardPlus, Pill, ArrowLeft } from 'lucide-react';
 import { generateMockHash } from '../utils/helpers';
 import GlassCard from '../components/ui/GlassCard';
 import AnimatedButton from '../components/ui/AnimatedButton';
 import PatientProfilePage from './PatientProfilePage';
-import PatientDashboard from './PatientDashboard'; 
+import PatientDashboard from './PatientDashboard';
+import { getPatientById } from '../api/patients';
 
 const SendReportCard = ({ providerName, patientId, theme, onReportSent }) => {
     const [file, setFile] = useState(null);
@@ -88,30 +89,54 @@ const ManageCarePlanCard = ({ patient, theme, onUpdateCarePlan }) => {
 };
 
 
-const PatientDetailView = ({ patient, onBack, theme, providerName, onUpdatePatient }) => {
+const PatientDetailView = ({ patient, onNavigate, theme, providerName, onUpdatePatient }) => {
+    const [patientData, setPatientData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchPatientData = async () => {
+            try {
+                const response = await getPatientById(patient._id);
+                setPatientData(response.data);
+            } catch (err) {
+                setError('Failed to fetch patient data.');
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (patient?._id) {
+            fetchPatientData();
+        }
+    }, [patient]);
+
     const handleReportSent = (newReport) => {
-        const updatedPatient = { ...patient, records: [...patient.records, newReport] };
-        onUpdatePatient(updatedPatient);
+        const updatedPatient = { ...patientData, records: [...patientData.records, newReport] };
+        setPatientData(updatedPatient);
     };
 
     const handleUpdateCarePlan = (newCarePlan) => {
-        const updatedPatient = { ...patient, carePlan: newCarePlan };
-        onUpdatePatient(updatedPatient);
+        const updatedPatient = { ...patientData, carePlan: newCarePlan };
+        setPatientData(updatedPatient);
     };
+
+    if (loading) {
+        return <div className={`text-center p-6 ${theme.text}`}>Loading patient details...</div>;
+    }
+
+    if (error) {
+        return <div className={`text-center p-6 text-red-500`}>{error}</div>;
+    }
 
     return (
         <div className="p-6">
-            <AnimatedButton onClick={onBack} className="mb-4">Back to Dashboard</AnimatedButton>
-            <PatientProfilePage user={patient} isViewOnly={true}/>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-                <div className="lg:col-span-2">
-                    <PatientDashboard user={patient} isViewOnly={true}/>
-                </div>
-                <div className="space-y-6">
-                    <ManageCarePlanCard patient={patient} theme={theme} onUpdateCarePlan={handleUpdateCarePlan} />
-                    <SendReportCard providerName={providerName} patientId={patient.id} theme={theme} onReportSent={handleReportSent} />
-                </div>
-            </div>
+            <button onClick={() => onNavigate('back')} className="flex items-center gap-2 mb-6 text-blue-400 hover:underline">
+                <ArrowLeft size={20} />
+                <span>Back to List</span>
+            </button>
+            {patientData && <PatientProfilePage user={patientData} isViewOnly={true}/>}
         </div>
     );
 };

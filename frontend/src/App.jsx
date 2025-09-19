@@ -22,16 +22,19 @@ import PermissionsPage from './pages/PermissionsPage';
 import SymptomCheckerPage from './pages/SymptomCheckerPage';  
 import AiReportAnalyzer from './components/features/AiAnalyzer';
 import ProviderAppointmentsPage from './pages/ProviderAppointmentsPage.jsx';
+import { getAllPatients } from './api/patients.js';
 
 
 
 function AppContent() {
     const { theme } = useContext(ThemeContext);
     const [user, setUser] = useState(null);
-    const [currentPage, setCurrentPage] = useState('auth');
-    const [viewingPatientId, setViewingPatientId] = useState(null);
+    const [view, setView] = useState('auth');
+    const [activeId, setActiveId] = useState(null);
+    const [viewHistory, setViewHistory] = useState([]);
     const [needsOnboarding, setNeedsOnboarding] = useState(false);
     const [masterPatientData, setMasterPatientData] = useState(mockPatientData);
+    const [patients, setPatients] = useState([]);
 
     useEffect(() => {
         const jspdfScript = document.createElement('script');
@@ -44,6 +47,20 @@ function AppContent() {
             }
         };
     }, []);
+
+    useEffect(() => {
+        if (user?.type === 'provider') {
+            const fetchPatients = async () => {
+                try {
+                    const response = await getAllPatients();
+                    setPatients(response.data || []);
+                } catch (err) {
+                    console.error('Failed to fetch patients.', err);
+                }
+            };
+            fetchPatients();
+        }
+    }, [user]);
 
     const handleLogin = async (loggedInUser, userType) => {
         let userData;
@@ -71,7 +88,7 @@ function AppContent() {
             userData = { ...mockAdminData, type: 'admin' };
         }
         setUser(userData);
-        setCurrentPage('dashboard');
+        setView('dashboard');
     };
 
 
@@ -85,7 +102,7 @@ function AppContent() {
         };
         setUser(newUser);
         setNeedsOnboarding(true);
-        setCurrentPage('onboarding');
+        setView('onboarding');
     };
 
     const handleOnboardingComplete = (updatedUser) => {
@@ -94,7 +111,7 @@ function AppContent() {
             setMasterPatientData(prev => ({ ...prev, ...updatedUser }));
         }
         setNeedsOnboarding(false);
-        setCurrentPage('dashboard');
+        setView('dashboard');
     };
 
     const handleUpdatePatientData = (updatedPatient) => {
@@ -152,19 +169,25 @@ function AppContent() {
             console.error('Logout failed:', error);
         }
         setUser(null);
-        setViewingPatientId(null);
+        setActiveId(null);
         setNeedsOnboarding(false);
-        setCurrentPage('auth');
+        setView('auth');
+        setViewHistory([]);
     };
 
 
-    const handleNavigate = (page, data = null) => {
-        if (page === 'view-patient') {
-            setViewingPatientId(data);
+    const handleNavigate = (newView, id = null) => {
+        if (newView === 'back') {
+            const previousView = viewHistory.pop();
+            if (previousView) {
+                setView(previousView);
+                setViewHistory([...viewHistory]);
+            }
         } else {
-            setViewingPatientId(null);
+            setViewHistory([...viewHistory, view]);
+            setView(newView);
+            setActiveId(id);
         }
-        setCurrentPage(page);
     };
 
     const renderPage = () => {
@@ -178,19 +201,19 @@ function AppContent() {
                 : <ProviderOnboardingForm user={user} onComplete={handleOnboardingComplete} theme={theme} />;
         }
 
-        if (viewingPatientId) {
-            const patientDataForView = { ...masterPatientData, ...mockProviderData.patients.find(p => p.id === viewingPatientId) };
-            return <PatientDetailView patient={patientDataForView} providerName={user.name} onBack={() => setViewingPatientId(null)} theme={theme} onUpdatePatient={handleUpdatePatientData} />;
+        if (view === 'view-patient' && activeId) {
+            const patientDataForView = patients.find(p => p._id === activeId);
+            return <PatientDetailView patient={patientDataForView} providerName={user.name} onNavigate={handleNavigate} theme={theme} onUpdatePatient={handleUpdatePatientData} />;
         }
 
         const currentUser = user;
 
 
         let pageComponent;
-        switch (currentPage) {
+        switch (view) {
             case 'dashboard':
                 if (currentUser.type === 'patient') pageComponent = <PatientDashboard user={currentUser} />;
-                else if (currentUser.type === 'provider') pageComponent = <ProviderDashboard user={currentUser} onNavigate={handleNavigate} />;
+                else if (currentUser.type === 'provider') pageComponent = <ProviderDashboard user={currentUser} onNavigate={handleNavigate} patients={patients} />;
                 else if (currentUser.type === 'admin') pageComponent = <AdminDashboard user={currentUser} />;
                 break;
             case 'profile':

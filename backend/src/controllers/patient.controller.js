@@ -204,7 +204,8 @@ const updatePatientProfile = asyncHandler(async (req, res) => {
 
 const getPatientProfile = asyncHandler(async (req, res) => {
     // The patient's data is attached to the request by the verifyJWTPatient middleware
-    const patient = await Patient.findById(req.patient._id).select("-password -refreshToken");
+    const patientId = req.params.id || req.patient?._id;
+    const patient = await Patient.findById(patientId).select("-password -refreshToken");
 
     if (!patient) {
         throw new ApiError(404, "Patient not found.");
@@ -229,10 +230,19 @@ const getPatientProfile = asyncHandler(async (req, res) => {
 });
 
 
+const getAllPatients = asyncHandler(async (req, res) => {
+    const patients = await Patient.find({}).select("-password -refreshToken");
+    if (!patients) {
+        throw new ApiError(404, "No patients found");
+    }
+    return res.status(200).json(new ApiResponse(200, patients, "All patients fetched successfully"));
+});
+
 export {
     registerPatient,
     loginPatient,
     logoutPatient,
+    getPatientProfile,
     updatePatientProfile,
-    getPatientProfile
+    getAllPatients
 };

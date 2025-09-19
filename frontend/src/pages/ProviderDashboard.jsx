@@ -1,12 +1,35 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+
 import { Search } from 'lucide-react';
 import { ThemeContext } from '../context/ThemeContext';
 import GlassCard from '../components/ui/GlassCard';
+import { getAllPatients } from '../api/patients';
 
 const ProviderDashboard = ({ user, onNavigate }) => {
     const { theme } = useContext(ThemeContext);
     const [searchTerm, setSearchTerm] = useState('');
-    const filteredPatients = user.patients.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
+    const [patients, setPatients] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchPatients = async () => {
+            try {
+                const response = await getAllPatients();
+                setPatients(response.data || []);
+            } catch (err) {
+                setError('Failed to fetch patients.');
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchPatients();
+    }, []);
+
+    const filteredPatients = patients.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
+
     
     const getStatusColor = (status) => {
         if (status === 'Critical') return 'bg-red-500';
@@ -21,8 +44,9 @@ const ProviderDashboard = ({ user, onNavigate }) => {
                 <p className={`opacity-80 ${theme.text}`}>Here is your dashboard for today.</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <GlassCard><h4 className="font-bold">Total Patients</h4><p className="text-3xl font-bold">{user.stats.patientCount}</p></GlassCard>
+                <GlassCard><h4 className="font-bold">Total Patients</h4><p className="text-3xl font-bold">{patients.length}</p></GlassCard>
                 <GlassCard><h4 className="font-bold">Upcoming Appointments</h4><p className="text-3xl font-bold">{user.appointments.length}</p></GlassCard>
+
                 <GlassCard><h4 className="font-bold">Critical AI Alerts</h4><p className="text-3xl font-bold">{user.aiInsights.filter(i => i.level === 'Critical').length}</p></GlassCard>
             </div>
 
@@ -70,22 +94,28 @@ const ProviderDashboard = ({ user, onNavigate }) => {
                     </div>
                 </div>
                 <div className="max-h-96 overflow-y-auto pr-2">
-                    {filteredPatients.map(p => (
-                         <div key={p.id} onClick={() => onNavigate('view-patient', p.id)} className={`p-3 mb-2 rounded-lg flex items-center justify-between cursor-pointer transition-colors hover:bg-slate-700 ${theme.secondary}`}>
-                            <div>
-                                <p className="font-semibold">{p.name} <span className="opacity-60 text-sm">({p.id})</span></p>
-                                <p className="text-sm opacity-70">Last Checkup: {p.lastCheckup}</p>
-                            </div>
-                            <div className="flex items-center gap-4">
-                                <p className="text-sm">HR: {p.lastVitals.hr} | BP: {p.lastVitals.bp}</p>
+                    {loading ? (
+                        <p className={theme.text}>Loading patients...</p>
+                    ) : error ? (
+                        <p className="text-red-500">{error}</p>
+                    ) : filteredPatients.length > 0 ? (
+                        filteredPatients.map(p => (
+                            <div key={p._id} onClick={() => onNavigate('view-patient', p._id)} className={`p-3 mb-2 rounded-lg flex items-center justify-between cursor-pointer transition-colors hover:bg-slate-700 ${theme.secondary}`}>
+                                <div>
+                                    <p className="font-semibold">{p.name} <span className="opacity-60 text-sm">({p._id.slice(-6)})</span></p>
+                                    <p className="text-sm opacity-70">{p.email}</p>
+                                </div>
                                 <div className="flex items-center gap-2">
-                                    <div className={`w-3 h-3 rounded-full ${getStatusColor(p.status)}`}></div>
-                                    <span>{p.status}</span>
+                                    <div className={`w-3 h-3 rounded-full ${getStatusColor('Stable')}`}></div>
+                                    <span>Stable</span>
                                 </div>
                             </div>
-                         </div>
-                    ))}
+                        ))
+                    ) : (
+                        <p className={theme.text}>No patients found.</p>
+                    )}
                 </div>
+
             </GlassCard>
         </div>
     );
