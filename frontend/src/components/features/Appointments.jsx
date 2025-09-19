@@ -5,7 +5,7 @@ import AnimatedButton from '../ui/AnimatedButton.jsx';
 import { getAllProviders } from '../../api/appointments.js';
 
 // The list of upcoming appointments
-export const AppointmentList = ({ appointments = [], theme }) => (
+export const AppointmentList = ({ appointments = [], theme, onCancel }) => (
     <GlassCard>
         <h3 className={`text-xl font-bold mb-4 ${theme.text}`}>Upcoming Appointments</h3>
         <div className="space-y-3">
@@ -16,9 +16,14 @@ export const AppointmentList = ({ appointments = [], theme }) => (
                             <p className="font-semibold text-lg">{apt.providerName}</p>
                             <p className="text-sm opacity-70">{apt.reason}</p>
                         </div>
-                        <div>
-                            <p className="font-bold text-lg">{apt.date}</p>
-                            <p className="text-sm opacity-70 text-right">{apt.time}</p>
+                        <div className="flex items-center gap-4">
+                            <div>
+                                <p className="font-bold text-lg">{apt.date}</p>
+                                <p className="text-sm opacity-70 text-right">{apt.time}</p>
+                            </div>
+                            <button onClick={() => onCancel(apt.id)} title="Cancel Appointment" className="p-2 text-red-500 rounded-full hover:bg-red-500/20 transition-colors">
+                                <X size={20} />
+                            </button>
                         </div>
                     </div>
                 ))

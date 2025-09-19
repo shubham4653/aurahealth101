@@ -50,6 +50,16 @@ export const updateAppointmentStatus = async (appointmentId, status) => {
     }
 };
 
+export const cancelAppointment = async (appointmentId) => {
+    try {
+        const response = await api.delete(`/appointment/${appointmentId}`);
+        return response.data;
+    } catch (error) {
+        return error.response.data;
+    }
+};
+
+
 export const getAllProviders = async () => {
     try {
       const response = await api.get('/provider/all');

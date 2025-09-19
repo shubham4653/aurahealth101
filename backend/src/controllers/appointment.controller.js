@@ -38,13 +38,36 @@ const getPatientAppointments = asyncHandler(async (req, res) => {
 
 const getProviderAppointments = asyncHandler(async (req, res) => {
   const providerId = req.provider._id;
-  const appointments = await Appointment.find({ providerId }).populate('patientId', 'name email');
+  const appointments = await Appointment.find({ providerId }).populate('patientId', 'fullName email');
   return res
     .status(200)
     .json(new ApiResponse(200, appointments, 'Appointments fetched successfully'));
 });
 
+
+const cancelAppointment = asyncHandler(async (req, res) => {
+    const { appointmentId } = req.params;
+    const patientId = req.patient._id;
+
+    const appointment = await Appointment.findById(appointmentId);
+
+    if (!appointment) {
+        throw new ApiError(404, 'Appointment not found');
+    }
+
+    if (appointment.patientId.toString() !== patientId.toString()) {
+        throw new ApiError(403, 'You are not authorized to cancel this appointment');
+    }
+
+    await Appointment.findByIdAndDelete(appointmentId);
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, {}, 'Appointment cancelled successfully'));
+});
+
 const updateAppointmentStatus = asyncHandler(async (req, res) => {
+
     const { appointmentId } = req.params;
     const { status } = req.body;
 
@@ -71,4 +94,4 @@ const updateAppointmentStatus = asyncHandler(async (req, res) => {
 });
 
 
-export { createAppointment, getPatientAppointments, getProviderAppointments, updateAppointmentStatus };
+export { createAppointment, getPatientAppointments, getProviderAppointments, updateAppointmentStatus, cancelAppointment };

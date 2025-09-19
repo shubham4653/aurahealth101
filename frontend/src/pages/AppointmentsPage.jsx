@@ -3,7 +3,7 @@ import { CalendarPlus } from 'lucide-react';
 import { ThemeContext } from '../context/ThemeContext.jsx';
 import { AppointmentList, AppointmentScheduler } from '../components/features/Appointments.jsx';
 import AnimatedButton from '../components/ui/AnimatedButton.jsx';
-import { getPatientAppointments, scheduleAppointment } from '../api/appointments.js';
+import { getPatientAppointments, scheduleAppointment, cancelAppointment } from '../api/appointments.js';
 
 const AppointmentsPage = ({ user }) => {
     const { theme } = useContext(ThemeContext);
@@ -44,6 +44,15 @@ const AppointmentsPage = ({ user }) => {
         }
     };
 
+    const handleCancel = async (appointmentId) => {
+        const res = await cancelAppointment(appointmentId);
+        if (res.success) {
+            fetchAppointments();
+        } else {
+            console.error("Failed to cancel appointment:", res.message);
+        }
+    };
+
     return (
         <div className="p-6 space-y-6">
             <div className="flex justify-between items-center">
@@ -53,7 +62,7 @@ const AppointmentsPage = ({ user }) => {
                 </AnimatedButton>
             </div>
 
-            <AppointmentList appointments={appointments} theme={theme} />
+            <AppointmentList appointments={appointments} theme={theme} onCancel={handleCancel} />
 
             {showScheduler && (
                 <AppointmentScheduler

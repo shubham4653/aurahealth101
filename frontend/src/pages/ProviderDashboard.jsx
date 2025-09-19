@@ -42,7 +42,10 @@ const ProviderDashboard = ({ user, onNavigate }) => {
                     </div>
                 </GlassCard>
                  <GlassCard>
-                    <h3 className={`text-xl font-bold mb-4 ${theme.text}`}>Today's Appointments</h3>
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className={`text-xl font-bold ${theme.text}`}>Today's Appointments</h3>
+                        <button onClick={() => onNavigate('provider-appointments')} className="text-sm text-blue-400 hover:underline">View All</button>
+                    </div>
                     <div className="space-y-3">
                         {user.appointments.map(apt => (
                             <div key={apt.id} className={`p-3 rounded-lg flex items-center justify-between ${theme.secondary}`}>
@@ -55,6 +58,7 @@ const ProviderDashboard = ({ user, onNavigate }) => {
                         ))}
                     </div>
                 </GlassCard>
+
             </div>
 
             <GlassCard>

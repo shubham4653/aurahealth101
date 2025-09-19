@@ -21,6 +21,8 @@ import CarePlanPage from './pages/CarePlanPage';
 import PermissionsPage from './pages/PermissionsPage';        
 import SymptomCheckerPage from './pages/SymptomCheckerPage';  
 import AiReportAnalyzer from './components/features/AiAnalyzer';
+import ProviderAppointmentsPage from './pages/ProviderAppointmentsPage.jsx';
+
 
 
 function AppContent() {
@@ -214,7 +216,12 @@ function AppContent() {
                 pageComponent = <AiReportAnalyzer />;
                 break;
 
+            case 'provider-appointments':
+                pageComponent = <ProviderAppointmentsPage />;
+                break;
+
             default:
+
                 pageComponent = <PatientDashboard user={currentUser} />; // Fallback to dashboard
         }
 
