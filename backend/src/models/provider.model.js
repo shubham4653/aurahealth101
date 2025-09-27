@@ -23,6 +23,7 @@ const providerSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'User', 
     }],
+    walletAddress: {type: String, trim: true},
     refreshToken: {type: String},
     },
     { timestamps: true }

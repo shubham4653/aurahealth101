@@ -158,7 +158,7 @@ const getAllProviders = asyncHandler(async (req, res) => {
 
 
 const updateProviderProfile = asyncHandler(async (req, res) => {
-    const { name, specialty, qualifications, licenseNumber, yearsOfExperience, age, gender } = req.body;
+    const { name, specialty, qualifications, licenseNumber, yearsOfExperience, age, gender, walletAddress } = req.body;
     const updateFields = {};
     if (name) updateFields.name = name;
     if (specialty) updateFields.specialty = specialty;
@@ -167,6 +167,7 @@ const updateProviderProfile = asyncHandler(async (req, res) => {
     if (yearsOfExperience) updateFields.yearsOfExperience = yearsOfExperience;
     if (age) updateFields.age = age;
     if (gender) updateFields.gender = gender;
+    if (walletAddress) updateFields.walletAddress = walletAddress;
 
    
     // Filter out undefined fields to avoid overwriting with null

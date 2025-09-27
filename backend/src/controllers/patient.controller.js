@@ -153,7 +153,10 @@ const logoutPatient = asyncHandler(async (req, res) => {
 
 const updatePatientProfile = asyncHandler(async (req, res) => {
     // Destructure all possible fields from the body
-    const { name, phone, age, address, gender, bloodGroup, allergies, chronicConditions, emergencyContact } = req.body;
+    const { name, phone, age, address, gender, bloodGroup, allergies, chronicConditions, emergencyContact, walletAddress } = req.body;
+    
+    console.log('Received update data:', req.body);
+    console.log('Wallet address:', walletAddress);
 
     // Build an update object with only the provided fields
     const updateFields = {};
@@ -166,7 +169,9 @@ const updatePatientProfile = asyncHandler(async (req, res) => {
     if (allergies) updateFields.allergies = allergies;
     if (chronicConditions) updateFields.chroniccondition = chronicConditions;
     if (emergencyContact) updateFields.emergencyContact = emergencyContact;
+    if (walletAddress !== undefined) updateFields.walletAddress = walletAddress;
 
+    console.log('Update fields:', updateFields);
 
     // Check if there's anything to update
     if (Object.keys(updateFields).length === 0) {
@@ -195,6 +200,8 @@ const updatePatientProfile = asyncHandler(async (req, res) => {
     delete mappedPatient.contact;
     delete mappedPatient.bloodgroup;
     delete mappedPatient.chroniccondition;
+    
+    console.log('Mapped patient data being returned:', mappedPatient);
 
     return res
         .status(200)

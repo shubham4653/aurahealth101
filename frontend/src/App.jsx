@@ -23,7 +23,7 @@ import SymptomCheckerPage from './pages/SymptomCheckerPage';
 import AiReportAnalyzer from './components/features/AiAnalyzer';
 import ProviderAppointmentsPage from './pages/ProviderAppointmentsPage.jsx';
 import { getAllPatients } from './api/patients.js';
-
+import UploadRecordPage from './pages/UploadRecordPage';
 
 
 function AppContent() {
@@ -227,7 +227,7 @@ function AppContent() {
                 pageComponent = <CarePlanPage user={currentUser} onUpdateCarePlan={(newPlan) => handleUpdatePatientData({ ...currentUser, carePlan: newPlan })} />;
                 break;
             case 'my-records':
-                pageComponent = <RecordsPage user={currentUser} />;
+                pageComponent = <RecordsPage user={currentUser} onNavigate={handleNavigate} />;
                 break;
             case 'permissions':
                 pageComponent = <PermissionsPage user={currentUser} onUpdatePermissions={(newPerms) => handleUpdatePatientData({ ...currentUser, permissions: newPerms })} />;
@@ -237,6 +237,9 @@ function AppContent() {
                 break;
             case 'analyzer':
                 pageComponent = <AiReportAnalyzer />;
+                break;
+            case 'upload-record':
+                pageComponent = <UploadRecordPage user={currentUser} />;
                 break;
 
             case 'provider-appointments':

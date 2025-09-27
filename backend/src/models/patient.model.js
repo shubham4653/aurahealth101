@@ -34,6 +34,7 @@ const patientSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'Provider', 
     }],
+    walletAddress: {type: String, trim: true},
     refreshToken: {type: String},
     },
     {timestamps: true}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Settings, Award, GraduationCap, FileText, Save, X, User, Calendar, Users } from 'lucide-react';
+import { Settings, Award, GraduationCap, FileText, Save, X, User, Calendar, Users, Wallet } from 'lucide-react';
 import { ThemeContext } from '../context/ThemeContext';
 import GlassCard from '../components/ui/GlassCard';
 import AnimatedButton from '../components/ui/AnimatedButton';
@@ -9,13 +9,33 @@ import { updateProviderProfile } from '../api/auth';
 const ProviderProfilePage = ({ user, onUpdateProviderData }) => {
     const { theme } = useContext(ThemeContext);
     const [isEditing, setIsEditing] = useState(false);
-    const [formData, setFormData] = useState({ ...user });
+    const [formData, setFormData] = useState({ ...user, walletAddress: user.walletAddress || '' });
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [walletConnecting, setWalletConnecting] = useState(false);
 
     useEffect(() => {
-        setFormData({ ...user });
+        setFormData({ ...user, walletAddress: user.walletAddress || '' });
     }, [user]);
+
+    const connectMetaMask = async () => {
+        if (typeof window.ethereum !== 'undefined') {
+            setWalletConnecting(true);
+            try {
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                if (accounts.length > 0) {
+                    setFormData(prev => ({ ...prev, walletAddress: accounts[0] }));
+                    setSuccess('MetaMask connected successfully!');
+                }
+            } catch (err) {
+                setError('Failed to connect MetaMask: ' + err.message);
+            } finally {
+                setWalletConnecting(false);
+            }
+        } else {
+            setError('MetaMask is not installed. Please install MetaMask to connect your wallet.');
+        }
+    };
 
     const handleEdit = () => {
         setIsEditing(true);
@@ -119,6 +139,23 @@ const ProviderProfilePage = ({ user, onUpdateProviderData }) => {
                                 </div>
                             </div>
                         </GlassCard>
+                        <GlassCard>
+                            <h3 className={`text-xl font-bold mb-4 flex items-center gap-2 ${theme.text}`}><Wallet /> Wallet Connection</h3>
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-4">
+                                    <AnimatedButton onClick={connectMetaMask} disabled={walletConnecting} icon={Wallet} className="px-4 py-2">
+                                        {walletConnecting ? 'Connecting...' : 'Connect MetaMask'}
+                                    </AnimatedButton>
+                                    {formData.walletAddress && (
+                                        <div className="flex-1">
+                                            <p className={`text-sm opacity-70 ${theme.text}`}>Connected Wallet:</p>
+                                            <p className={`font-mono text-sm break-all ${theme.text}`}>{formData.walletAddress}</p>
+                                        </div>
+                                    )}
+                                </div>
+                                <FormInput placeholder="Wallet Address (or connect MetaMask above)" icon={Wallet} name="walletAddress" value={formData.walletAddress || ''} onChange={handleChange} theme={theme} />
+                            </div>
+                        </GlassCard>
                     </div>
                 ) : (
                     <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -149,6 +186,13 @@ const ProviderProfilePage = ({ user, onUpdateProviderData }) => {
                                         {q}
                                     </span>
                                 )) : <p className={`opacity-70 ${theme.text}`}>None listed</p>}
+                            </div>
+                        </GlassCard>
+                        <GlassCard>
+                            <h3 className={`text-xl font-bold mb-4 flex items-center gap-2 ${theme.text}`}><Wallet /> Wallet</h3>
+                            <div className={`space-y-3 ${theme.text}`}>
+                                <p><strong className="opacity-70">Wallet Address:</strong></p>
+                                <p className={`font-mono text-sm break-all ${theme.text}`}>{user.walletAddress || 'Not connected'}</p>
                             </div>
                         </GlassCard>
                     </div>

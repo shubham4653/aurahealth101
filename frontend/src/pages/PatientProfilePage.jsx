@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 
-import { User, Stethoscope, AlertTriangle, Settings, Download, Save, X, Calendar, Phone, Droplets, Mail, Home, Users, Heart } from 'lucide-react';
+import { User, Stethoscope, AlertTriangle, Settings, Download, Save, X, Calendar, Phone, Droplets, Mail, Home, Users, Heart, Wallet } from 'lucide-react';
 
 import { ThemeContext } from '../context/ThemeContext';
 import GlassCard from '../components/ui/GlassCard';
@@ -19,21 +19,43 @@ const PatientProfilePage = ({ user, onUpdatePatientData, isViewOnly = false }) =
     const [formData, setFormData] = useState({ 
         ...user,
         age: user.age || '',
-        emergencyContact: user.emergencyContact || { name: '', relation: '', phone: '' }
+        emergencyContact: user.emergencyContact || { name: '', relation: '', phone: '' },
+        walletAddress: user.walletAddress || ''
     });
 
 
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [walletConnecting, setWalletConnecting] = useState(false);
 
     useEffect(() => {
         // When the user prop updates (e.g., after a refetch), sync it to the form data
         setFormData({
             ...user,
             age: user.age || '',
-            emergencyContact: user.emergencyContact || { name: '', relation: '', phone: '' }
+            emergencyContact: user.emergencyContact || { name: '', relation: '', phone: '' },
+            walletAddress: user.walletAddress || ''
         });
     }, [user]);
+
+    const connectMetaMask = async () => {
+        if (typeof window.ethereum !== 'undefined') {
+            setWalletConnecting(true);
+            try {
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                if (accounts.length > 0) {
+                    setFormData(prev => ({ ...prev, walletAddress: accounts[0] }));
+                    setSuccess('MetaMask connected successfully!');
+                }
+            } catch (err) {
+                setError('Failed to connect MetaMask: ' + err.message);
+            } finally {
+                setWalletConnecting(false);
+            }
+        } else {
+            setError('MetaMask is not installed. Please install MetaMask to connect your wallet.');
+        }
+    };
 
 
 
@@ -91,6 +113,8 @@ const PatientProfilePage = ({ user, onUpdatePatientData, isViewOnly = false }) =
             chronicConditions: typeof formData.chronicConditions === 'string' 
                 ? formData.chronicConditions.split(',').map(s => s.trim()).filter(Boolean) 
                 : formData.chronicConditions,
+            // Ensure walletAddress is included
+            walletAddress: formData.walletAddress,
         };
         
         if (dataToSave.phone) {
@@ -108,9 +132,11 @@ const PatientProfilePage = ({ user, onUpdatePatientData, isViewOnly = false }) =
             dataToSave.emergencyContact.phone = String(dataToSave.emergencyContact.phone).replace(/\D/g, '');
         }
         try {
-
+            console.log('Form data before processing:', formData);
+            console.log('Sending data to backend:', dataToSave);
+            console.log('Wallet address being sent:', dataToSave.walletAddress);
             const result = await updatePatientProfile(dataToSave);
-
+            console.log('Backend response:', result);
             setSuccess(result.message || "Profile updated successfully!");
 
             if (onUpdatePatientData) {
@@ -229,6 +255,23 @@ const PatientProfilePage = ({ user, onUpdatePatientData, isViewOnly = false }) =
                                 </div>
                             </div>
                         </GlassCard>
+                        <GlassCard>
+                            <h3 className={`text-xl font-bold mb-4 flex items-center gap-2 ${theme.text}`}><Wallet /> Wallet Connection</h3>
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-4">
+                                    <AnimatedButton onClick={connectMetaMask} disabled={walletConnecting} icon={Wallet} className="px-4 py-2">
+                                        {walletConnecting ? 'Connecting...' : 'Connect MetaMask'}
+                                    </AnimatedButton>
+                                    {formData.walletAddress && (
+                                        <div className="flex-1">
+                                            <p className={`text-sm opacity-70 ${theme.text}`}>Connected Wallet:</p>
+                                            <p className={`font-mono text-sm break-all ${theme.text}`}>{formData.walletAddress}</p>
+                                        </div>
+                                    )}
+                                </div>
+                                <FormInput placeholder="Wallet Address (or connect MetaMask above)" icon={Wallet} name="walletAddress" value={formData.walletAddress || ''} onChange={handleChange} theme={theme} />
+                            </div>
+                        </GlassCard>
                          <GlassCard>
                             <h3 className={`text-xl font-bold mb-4 flex items-center gap-2 ${theme.text}`}><Stethoscope /> Health Conditions</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -253,6 +296,7 @@ const PatientProfilePage = ({ user, onUpdatePatientData, isViewOnly = false }) =
                         <GlassCard><h3 className={`text-xl font-bold mb-4 flex items-center gap-2 ${theme.text}`}><Stethoscope /> Health Conditions</h3><div className={`space-y-3 ${theme.text}`}><p><strong className="opacity-70">Allergies:</strong></p><div className="flex flex-wrap gap-2">{allergiesArray.map(allergy => <span key={allergy} className={`px-3 py-1 text-sm rounded-full ${theme.primary} ${theme.primaryText}`}>{allergy}</span>) }</div><p className="mt-2"><strong className="opacity-70">Chronic Conditions:</strong></p><div className="flex flex-wrap gap-2">{conditionsArray.map(cond => <span key={cond} className={`px-3 py-1 text-sm rounded-full ${theme.secondary} ${theme.secondaryText}`}>{cond}</span>)}</div></div></GlassCard>
 
                         <GlassCard><h3 className={`text-xl font-bold mb-4 flex items-center gap-2 ${theme.text}`}><AlertTriangle /> Emergency Contact</h3><div className={`space-y-3 ${theme.text}`}><p><strong className="opacity-70">Name:</strong> {user.emergencyContact?.name || 'N/A'}</p><p><strong className="opacity-70">Relation:</strong> {user.emergencyContact?.relation || 'N/A'}</p><p><strong className="opacity-70">Phone:</strong> {user.emergencyContact?.phone?.replace(/\D/g, '') || 'N/A'}</p></div></GlassCard>
+                        <GlassCard><h3 className={`text-xl font-bold mb-4 flex items-center gap-2 ${theme.text}`}><Wallet /> Wallet</h3><div className={`space-y-3 ${theme.text}`}><p><strong className="opacity-70">Wallet Address:</strong></p><p className={`font-mono text-sm break-all ${theme.text}`}>{user.walletAddress || 'Not connected'}</p></div></GlassCard>
                     </div>
 
                 )}

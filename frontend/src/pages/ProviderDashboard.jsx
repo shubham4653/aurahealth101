@@ -4,6 +4,7 @@ import { Search } from 'lucide-react';
 import { ThemeContext } from '../context/ThemeContext';
 import GlassCard from '../components/ui/GlassCard';
 import { getAllPatients } from '../api/patients';
+import AnimatedButton from '../components/ui/AnimatedButton';
 
 const ProviderDashboard = ({ user, onNavigate }) => {
     const { theme } = useContext(ThemeContext);
@@ -39,9 +40,16 @@ const ProviderDashboard = ({ user, onNavigate }) => {
 
     return (
         <div className="p-6 space-y-6">
-            <div>
-                <h1 className={`text-3xl font-bold ${theme.text}`}>Welcome back, {user.name}!</h1>
-                <p className={`opacity-80 ${theme.text}`}>Here is your dashboard for today.</p>
+            <div className="flex justify-between items-center">
+                <div>
+                    <h1 className={`text-3xl font-bold ${theme.text}`}>Welcome back, {user.name}!</h1>
+                    <p className={`opacity-80 ${theme.text}`}>Here is your dashboard for today.</p>
+                </div>
+                {onNavigate && (
+                    <AnimatedButton onClick={() => onNavigate('upload-record')} className="px-4 py-2 text-sm">
+                        Upload New Record
+                    </AnimatedButton>
+                )}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <GlassCard><h4 className="font-bold">Total Patients</h4><p className="text-3xl font-bold">{patients.length}</p></GlassCard>

@@ -7,6 +7,7 @@ import cors from 'cors';
 import patientRoutes from './routes/patient.routes.js'
 import providerRoutes from './routes/provider.routes.js';
 import appointmentRoutes from './routes/appointment.routes.js';
+import contractRoutes from './routes/contract.routes.js';
 
 const app = express();
 
@@ -36,7 +37,7 @@ app.use(cookieParser())
 app.use('/api/v1/patient', patientRoutes);
 app.use('/api/v1/provider', providerRoutes);
 app.use('/api/v1/appointment', appointmentRoutes);
-
+app.use('/api/v1/contract', contractRoutes);
 
 
 export {app}
