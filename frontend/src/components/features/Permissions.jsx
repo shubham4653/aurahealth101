@@ -6,7 +6,7 @@ const PermissionsList = ({ permissions, theme, onScopeChange, onStatusToggle }) 
         <div className="space-y-3">
             {permissions.map(p => (
                 <div key={p.id} className={`p-4 rounded-lg ${theme.secondary}`}>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
                         {/* Grantee Info */}
                         <div className="md:col-span-1">
                             <p className={`font-semibold text-lg ${theme.secondaryText}`}>{p.grantee}</p>
@@ -26,6 +26,22 @@ const PermissionsList = ({ permissions, theme, onScopeChange, onStatusToggle }) 
                                 <option className={theme.bg}>Vitals Only</option>
                                 <option className={theme.bg}>Anonymized Vitals</option>
                                 <option className={theme.bg}>Lab Reports Only</option>
+                            </select>
+                        </div>
+
+                        {/* Document Type */}
+                        <div className="md:col-span-1">
+                            <label className={`text-xs opacity-70 ${theme.secondaryText}`}>Document Type</label>
+                            <select
+                                value={p.documentType || 'All'}
+                                onChange={(e) => onScopeChange(p.id, p.scope, e.target.value)}
+                                className={`w-full p-2 mt-1 rounded-lg bg-transparent border-2 ${theme.accent} ${theme.text} focus:outline-none focus:ring-1`}
+                                disabled={p.status !== 'Active'}
+                            >
+                                <option className={theme.bg} value="All">All</option>
+                                <option className={theme.bg} value="Lab Report">Lab Report</option>
+                                <option className={theme.bg} value="Prescription">Prescription</option>
+                                <option className={theme.bg} value="Imaging">Imaging</option>
                             </select>
                         </div>
 

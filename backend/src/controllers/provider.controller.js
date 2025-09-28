@@ -148,7 +148,7 @@ const logoutProvider = asyncHandler(async (req, res) => {
 })
 
 const getAllProviders = asyncHandler(async (req, res) => {
-    const providers = await Provider.find({}).select('name specialty');
+    const providers = await Provider.find({}).select('name specialty walletAddress email');
     return res
         .status(200)
         .json(new ApiResponse(200, providers, 'Providers fetched successfully'));

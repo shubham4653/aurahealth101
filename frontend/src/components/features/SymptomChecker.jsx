@@ -21,7 +21,9 @@ const SymptomChecker = ({ messages, input, isLoading, theme, onInputChange, onSe
                             </div>
                         )}
                         <div className={`max-w-md p-3 rounded-2xl ${msg.sender === 'user' ? `${theme.primary} ${theme.primaryText}` : `${theme.secondary} ${theme.secondaryText}`}`}>
-                            <p>{msg.text}</p>
+                            <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                                {msg.text}
+                            </div>
                         </div>
                     </div>
                 ))}

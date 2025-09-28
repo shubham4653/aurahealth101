@@ -8,6 +8,8 @@ import patientRoutes from './routes/patient.routes.js'
 import providerRoutes from './routes/provider.routes.js';
 import appointmentRoutes from './routes/appointment.routes.js';
 import contractRoutes from './routes/contract.routes.js';
+import permissionRoutes from './routes/permission.routes.js';
+import medicalRecordRoutes from './routes/medicalRecord.routes.js';
 
 const app = express();
 
@@ -38,6 +40,8 @@ app.use('/api/v1/patient', patientRoutes);
 app.use('/api/v1/provider', providerRoutes);
 app.use('/api/v1/appointment', appointmentRoutes);
 app.use('/api/v1/contract', contractRoutes);
+app.use('/api/v1/permission', permissionRoutes);
+app.use('/api/v1/medical-record', medicalRecordRoutes);
 
 
 export {app}

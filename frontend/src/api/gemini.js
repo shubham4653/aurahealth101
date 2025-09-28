@@ -1,8 +1,5 @@
-const API_KEY = "KEy_HERE"; // Replace with your actual API key
-const API_URL_FLASH = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=${API_KEY}`;
-const API_URL_TEXT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`;
-const API_URL_JSON = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
-
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "KEy_HERE"; // Get from environment variables
+const API_URL_FLASH = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
 
 const handleApiResponse = async (response) => {
     if (!response.ok) {
@@ -56,7 +53,7 @@ export const generateWellnessPlan = async (healthDataSummary, prompt) => {
             response_mime_type: "application/json",
         }
     };
-    const response = await fetch(API_URL_JSON, {
+    const response = await fetch(API_URL_FLASH, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -67,13 +64,36 @@ export const generateWellnessPlan = async (healthDataSummary, prompt) => {
 
 
 export const getSymptomResponse = async (messages) => {
-    const chatHistory = messages.map(msg => ({
-        role: msg.sender === 'ai' ? "model" : "user",
-        parts: [{ text: msg.text }]
-    }));
+    // Add a system prompt for better medical advice
+    const systemPrompt = `You are an AI medical assistant that helps users understand their symptoms. Please provide helpful, preliminary insights while emphasizing that this is not a substitute for professional medical advice. 
 
-    const payload = { contents: chatHistory };
-    const response = await fetch(API_URL_TEXT, {
+Guidelines:
+- Be empathetic and supportive
+- Ask clarifying questions about symptoms (duration, severity, associated symptoms)
+- Suggest when to seek immediate medical attention
+- Provide general information about possible conditions
+- Always recommend consulting a healthcare professional for proper diagnosis
+- Be cautious with serious symptoms and recommend emergency care when appropriate
+
+Keep responses concise but informative.`;
+
+    const chatHistory = [
+        { role: "user", parts: [{ text: systemPrompt }] },
+        ...messages.map(msg => ({
+            role: msg.sender === 'ai' ? "model" : "user",
+            parts: [{ text: msg.text }]
+        }))
+    ];
+
+    const payload = { 
+        contents: chatHistory,
+        generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 1000,
+        }
+    };
+    
+    const response = await fetch(API_URL_FLASH, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
