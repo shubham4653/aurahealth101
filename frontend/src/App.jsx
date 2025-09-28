@@ -22,6 +22,7 @@ import PermissionsPage from './pages/PermissionsPage';
 import SymptomCheckerPage from './pages/SymptomCheckerPage';  
 import AiReportAnalyzer from './components/features/AiAnalyzer';
 import ProviderAppointmentsPage from './pages/ProviderAppointmentsPage.jsx';
+import ChatPage from './pages/ChatPage';
 import { getAllPatients } from './api/patients.js';
 import UploadRecordPage from './pages/UploadRecordPage';
 
@@ -236,10 +237,13 @@ function AppContent() {
                 pageComponent = <SymptomCheckerPage />;
                 break;
             case 'analyzer':
-                pageComponent = <AiReportAnalyzer />;
+                pageComponent = <AiReportAnalyzer user={currentUser} />;
                 break;
             case 'upload-record':
                 pageComponent = <UploadRecordPage user={currentUser} />;
+                break;
+            case 'chat':
+                pageComponent = <ChatPage user={currentUser} />;
                 break;
 
             case 'provider-appointments':

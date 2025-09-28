@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { User, LogOut, Settings, Bell, ChevronDown, BrainCircuit, MessageSquare, CalendarPlus, ListTodo, FileText, Lock, Sparkles } from 'lucide-react';
+import { User, LogOut, Settings, Bell, ChevronDown, BrainCircuit, MessageSquare, CalendarPlus, ListTodo, FileText, Lock, Sparkles, MessageCircle } from 'lucide-react';
 import { ThemeContext } from '../../context/ThemeContext';
 import AnimatedButton from '../ui/AnimatedButton';
 import ThemeSwitcher from '../ui/ThemeSwitcher';
@@ -15,6 +15,7 @@ const Header = ({ user, onLogout, onNavigate }) => {
                 <h1 className={`text-xl font-bold tracking-tighter ${theme.text}`}>AuraHealth</h1>
             </div>
             <div className="flex items-center gap-4">
+                {user.type !== 'admin' && <AnimatedButton onClick={() => onNavigate('chat')} icon={MessageCircle} className="px-4 py-2 text-sm">Messages</AnimatedButton>}
                 {user.type !== 'admin' && <AnimatedButton onClick={() => onNavigate('symptom-checker')} icon={MessageSquare} className="px-4 py-2 text-sm">Symptom Checker</AnimatedButton>}
                 <ThemeSwitcher />
                 <button className={`p-2 rounded-lg transition-colors duration-300 ${theme.secondary} ${theme.secondaryText} hover:bg-opacity-80`}><Bell size={20} /></button>

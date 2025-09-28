@@ -25,7 +25,7 @@ const ProviderAppointmentsPage = () => {
                     appointments.map(apt => (
                         <GlassCard key={apt._id}>
                             <div className="p-5">
-                                <h3 className={`text-xl font-semibold ${theme.text}`}>{apt.patientId.fullName}</h3>
+                                <h3 className={`text-xl font-semibold ${theme.text}`}>{apt.patientId.name}</h3>
                                 <p className={`text-sm opacity-80 ${theme.text}`}>{apt.patientId.email}</p>
                                 <div className="mt-4 space-y-2">
                                     <p><span className="font-semibold">Date:</span> {new Date(apt.appointmentDate).toLocaleDateString()}</p>

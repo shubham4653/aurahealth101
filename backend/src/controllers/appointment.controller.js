@@ -38,7 +38,7 @@ const getPatientAppointments = asyncHandler(async (req, res) => {
 
 const getProviderAppointments = asyncHandler(async (req, res) => {
   const providerId = req.provider._id;
-  const appointments = await Appointment.find({ providerId }).populate('patientId', 'fullName email');
+  const appointments = await Appointment.find({ providerId }).populate('patientId', 'name email');
   return res
     .status(200)
     .json(new ApiResponse(200, appointments, 'Appointments fetched successfully'));

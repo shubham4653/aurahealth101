@@ -10,6 +10,7 @@ import appointmentRoutes from './routes/appointment.routes.js';
 import contractRoutes from './routes/contract.routes.js';
 import permissionRoutes from './routes/permission.routes.js';
 import medicalRecordRoutes from './routes/medicalRecord.routes.js';
+import chatRoutes from './routes/chat.routes.js';
 
 const app = express();
 
@@ -42,6 +43,7 @@ app.use('/api/v1/appointment', appointmentRoutes);
 app.use('/api/v1/contract', contractRoutes);
 app.use('/api/v1/permission', permissionRoutes);
 app.use('/api/v1/medical-record', medicalRecordRoutes);
+app.use('/api/v1/chat', chatRoutes);
 
 
 export {app}
