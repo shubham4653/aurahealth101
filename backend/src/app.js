@@ -11,6 +11,7 @@ import contractRoutes from './routes/contract.routes.js';
 import permissionRoutes from './routes/permission.routes.js';
 import medicalRecordRoutes from './routes/medicalRecord.routes.js';
 import chatRoutes from './routes/chat.routes.js';
+import carePlanRoutes from './routes/carePlan.routes.js';
 
 const app = express();
 
@@ -44,6 +45,7 @@ app.use('/api/v1/contract', contractRoutes);
 app.use('/api/v1/permission', permissionRoutes);
 app.use('/api/v1/medical-record', medicalRecordRoutes);
 app.use('/api/v1/chat', chatRoutes);
+app.use('/api/v1/care-plan', carePlanRoutes);
 
 
 export {app}

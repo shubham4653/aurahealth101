@@ -207,6 +207,8 @@ const sendMessage = asyncHandler(async (req, res) => {
     }
   } else if (messageType === 'video_call') {
     messageData.callData = parsedContent.callData || {};
+    messageData.content.callStatus = parsedContent.callStatus || 'initiated'; // initiated, accepted, declined, ended
+    messageData.content.callType = parsedContent.callType || 'video'; // video, audio
   }
 
   // Create message

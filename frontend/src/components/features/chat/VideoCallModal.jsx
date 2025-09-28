@@ -6,6 +6,8 @@ import { useContext } from 'react';
 const VideoCallModal = ({ 
   isOpen, 
   onClose, 
+  onCallAccepted,
+  onCallConnected,
   conversation, 
   currentUserId,
   user 
@@ -33,12 +35,31 @@ const VideoCallModal = ({
 
   const initializeZegoCloud = async () => {
     try {
-      // ZegoCloud initialization
-      // Note: You'll need to install @zegocloud/zego-express-engine-webrtc
-      // npm install @zegocloud/zego-express-engine-webrtc
+      console.log('Initializing video call...');
+      setCallStatus('connecting');
       
-      // For now, we'll simulate the video call functionality
-      console.log('Initializing ZegoCloud for video call...');
+      // Try to request camera and microphone access, but don't fail if it doesn't work
+      let stream = null;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: true
+        });
+        
+        // Set local video stream
+        if (localVideoRef.current) {
+          localVideoRef.current.srcObject = stream;
+        }
+        
+        // Store stream for cleanup
+        zegoEngineRef.current = stream;
+        
+        console.log('Camera and microphone access granted');
+      } catch (mediaError) {
+        console.warn('Camera/microphone access denied or failed:', mediaError);
+        // Continue without camera/microphone - user can enable later
+        zegoEngineRef.current = null;
+      }
       
       // Simulate connection process
       setCallStatus('ringing');
@@ -47,45 +68,30 @@ const VideoCallModal = ({
         setCallStatus('connected');
         setIsConnected(true);
         startCallTimer();
-      }, 3000);
-
-      // TODO: Replace with actual ZegoCloud implementation
-      /*
-      import { ZegoExpressEngine } from 'zego-express-engine-webrtc';
-      
-      const appID = process.env.REACT_APP_ZEGO_APP_ID;
-      const appSign = process.env.REACT_APP_ZEGO_APP_SIGN;
-      
-      zegoEngineRef.current = new ZegoExpressEngine(appID, appSign);
-      
-      // Set up event handlers
-      zegoEngineRef.current.on('roomStateUpdate', (roomID, state, error, extendedData) => {
-        if (state === 'CONNECTED') {
-          setCallStatus('connected');
-          setIsConnected(true);
-          startCallTimer();
+        
+        // Trigger call accepted event (only once)
+        if (onCallAccepted) {
+          onCallAccepted();
         }
-      });
-      
-      zegoEngineRef.current.on('roomUserUpdate', (roomID, updateType, userList) => {
-        // Handle user join/leave
-      });
-      
-      zegoEngineRef.current.on('remoteUserStateUpdate', (roomID, userID, state) => {
-        // Handle remote user state changes
-      });
-      
-      // Login to room
-      const roomID = `room_${conversation._id}`;
-      const userID = currentUserId;
-      const userName = user.name;
-      
-      await zegoEngineRef.current.loginRoom(roomID, { userID, userName });
-      */
+        
+        // Trigger call connected event
+        if (onCallConnected) {
+          onCallConnected();
+        }
+        
+        // For demo purposes, we'll use the same stream for remote video
+        // In a real implementation, this would come from the other participant
+        if (remoteVideoRef.current && stream) {
+          // Create a clone of the stream for remote video (demo only)
+          const remoteStream = stream.clone();
+          remoteVideoRef.current.srcObject = remoteStream;
+        }
+      }, 2000);
       
     } catch (error) {
-      console.error('Error initializing ZegoCloud:', error);
+      console.error('Error initializing video call:', error);
       setCallStatus('ended');
+      alert('Error initializing video call. Please try again.');
     }
   };
 
@@ -100,9 +106,19 @@ const VideoCallModal = ({
       clearInterval(intervalRef.current);
     }
     
-    if (zegoEngineRef.current) {
-      // zegoEngineRef.current.logoutRoom();
-      // zegoEngineRef.current.destroyEngine();
+    // Stop all media tracks
+    if (zegoEngineRef.current && zegoEngineRef.current.getTracks) {
+      zegoEngineRef.current.getTracks().forEach(track => {
+        track.stop();
+      });
+    }
+    
+    // Clear video refs
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = null;
+    }
+    if (remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = null;
     }
   };
 
@@ -113,16 +129,62 @@ const VideoCallModal = ({
     onClose();
   };
 
-  const toggleMute = () => {
-    setIsMuted(!isMuted);
-    // TODO: Implement actual mute functionality with ZegoCloud
-    // zegoEngineRef.current?.muteMicrophone(!isMuted);
+  const enableCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true
+      });
+      
+      // Set local video stream
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = stream;
+      }
+      
+      // Store stream for cleanup
+      zegoEngineRef.current = stream;
+      setIsVideoOff(false);
+      setIsMuted(false);
+      
+      console.log('Camera and microphone enabled');
+    } catch (error) {
+      console.error('Error enabling camera:', error);
+      alert('Unable to access camera/microphone. Please check permissions.');
+    }
   };
 
-  const toggleVideo = () => {
+  const toggleMute = async () => {
+    // If no stream exists, try to enable camera first
+    if (!zegoEngineRef.current) {
+      await enableCamera();
+      return;
+    }
+    
+    setIsMuted(!isMuted);
+    
+    // Toggle audio tracks
+    if (zegoEngineRef.current && zegoEngineRef.current.getAudioTracks) {
+      zegoEngineRef.current.getAudioTracks().forEach(track => {
+        track.enabled = isMuted; // Enable when currently muted, disable when not muted
+      });
+    }
+  };
+
+  const toggleVideo = async () => {
+    // If no stream exists, try to enable camera first
+    if (!zegoEngineRef.current) {
+      await enableCamera();
+      return;
+    }
+    
     setIsVideoOff(!isVideoOff);
-    // TODO: Implement actual video toggle with ZegoCloud
-    // zegoEngineRef.current?.enableCamera(!isVideoOff);
+    
+    // Toggle video tracks
+    if (zegoEngineRef.current && zegoEngineRef.current.getVideoTracks) {
+      zegoEngineRef.current.getVideoTracks().forEach(track => {
+        track.enabled = isVideoOff; // Enable when currently off, disable when on
+      });
+    }
   };
 
   const formatDuration = (seconds) => {
@@ -192,11 +254,19 @@ const VideoCallModal = ({
 
           {/* Local Video */}
           <div className="absolute top-4 right-4 w-48 h-36 bg-gray-800 rounded-lg overflow-hidden">
-            {isVideoOff ? (
-              <div className="w-full h-full flex items-center justify-center">
-                <span className="text-white text-lg font-semibold">
+            {isVideoOff || !zegoEngineRef.current ? (
+              <div className="w-full h-full flex flex-col items-center justify-center">
+                <span className="text-white text-lg font-semibold mb-2">
                   {user.name?.charAt(0)?.toUpperCase() || '?'}
                 </span>
+                {!zegoEngineRef.current && (
+                  <button
+                    onClick={enableCamera}
+                    className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700"
+                  >
+                    Enable Camera
+                  </button>
+                )}
               </div>
             ) : (
               <video

@@ -8,6 +8,14 @@ import PatientDashboard from './PatientDashboard';
 import { getPatientById } from '../api/patients';
 import { listProviderPermissions } from '../api/permissions';
 import { api } from '../api/auth';
+import CarePlan from '../components/features/CarePlan';
+import { 
+    getCarePlanByPatientId, 
+    addTask, 
+    addMedication, 
+    removeTask, 
+    removeMedication 
+} from '../api/carePlan';
 
 const SendReportCard = ({ providerName, patientId, theme, onReportSent }) => {
     const [file, setFile] = useState(null);
@@ -45,48 +53,151 @@ const SendReportCard = ({ providerName, patientId, theme, onReportSent }) => {
     );
 };
 
-const ManageCarePlanCard = ({ patient, theme, onUpdateCarePlan }) => {
-    const [newTask, setNewTask] = useState('');
-    const [newMed, setNewMed] = useState({ name: '', dosage: '', frequency: '' });
+const CarePlanManager = ({ patient, theme, onUpdateCarePlan }) => {
+    const [carePlan, setCarePlan] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [updating, setUpdating] = useState(false);
 
-    const handleAddTask = () => {
-        if(!newTask.trim()) return;
-        const updatedTasks = [...patient.carePlan.tasks, { id: Date.now(), text: newTask, completed: false }];
-        onUpdateCarePlan({ ...patient.carePlan, tasks: updatedTasks });
-        setNewTask('');
+    useEffect(() => {
+        if (patient?._id) {
+            fetchCarePlan();
+        }
+    }, [patient?._id]);
+
+    const fetchCarePlan = async () => {
+        try {
+            setLoading(true);
+            const response = await getCarePlanByPatientId(patient._id);
+            if (response.success && response.data) {
+                setCarePlan(response.data);
+            } else {
+                setCarePlan({ tasks: [], medications: [] });
+            }
+        } catch (err) {
+            setError('Failed to load care plan');
+            console.error('Error fetching care plan:', err);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleAddMed = () => {
-        if(!newMed.name.trim() || !newMed.dosage.trim() || !newMed.frequency.trim()) return;
-        const updatedMeds = [...patient.carePlan.medications, { id: Date.now(), ...newMed, completed: false }];
-        onUpdateCarePlan({ ...patient.carePlan, medications: updatedMeds });
-        setNewMed({ name: '', dosage: '', frequency: '' });
+    const handleAddTask = async (taskName) => {
+        try {
+            setUpdating(true);
+            const response = await addTask(patient._id, taskName, '');
+            if (response.success) {
+                setCarePlan(response.data);
+                onUpdateCarePlan && onUpdateCarePlan(response.data);
+            }
+        } catch (err) {
+            console.error('Error adding task:', err);
+        } finally {
+            setUpdating(false);
+        }
     };
 
+    const handleAddMedication = async (medicationData) => {
+        try {
+            setUpdating(true);
+            const response = await addMedication(
+                patient._id, 
+                medicationData.name, 
+                medicationData.dosage, 
+                medicationData.frequency
+            );
+            if (response.success) {
+                setCarePlan(response.data);
+                onUpdateCarePlan && onUpdateCarePlan(response.data);
+            }
+        } catch (err) {
+            console.error('Error adding medication:', err);
+        } finally {
+            setUpdating(false);
+        }
+    };
+
+    const handleRemoveTask = async (taskId) => {
+        try {
+            setUpdating(true);
+            const response = await removeTask(patient._id, taskId);
+            if (response.success) {
+                setCarePlan(response.data);
+                onUpdateCarePlan && onUpdateCarePlan(response.data);
+            }
+        } catch (err) {
+            console.error('Error removing task:', err);
+        } finally {
+            setUpdating(false);
+        }
+    };
+
+    const handleRemoveMedication = async (medicationId) => {
+        try {
+            setUpdating(true);
+            const response = await removeMedication(patient._id, medicationId);
+            if (response.success) {
+                setCarePlan(response.data);
+                onUpdateCarePlan && onUpdateCarePlan(response.data);
+            }
+        } catch (err) {
+            console.error('Error removing medication:', err);
+        } finally {
+            setUpdating(false);
+        }
+    };
+
+    if (loading) {
     return (
         <GlassCard>
-            <h3 className={`text-xl font-bold mb-4 ${theme.text}`}>Manage Care Plan</h3>
-            <div className="space-y-4">
-                <div>
-                    <h4 className="font-semibold mb-2">Add New Task</h4>
-                    <div className="flex gap-2">
-                        <input type="text" value={newTask} onChange={e => setNewTask(e.target.value)} placeholder="e.g., Check blood sugar" className={`flex-grow p-2 rounded-lg bg-transparent border-2 ${theme.accent} ${theme.text}`} />
-                        <AnimatedButton onClick={handleAddTask} icon={ClipboardPlus} className="px-4 py-2 text-sm" />
-                    </div>
+                <div className="flex items-center justify-center py-8">
+                    <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+                    <span className={`ml-3 ${theme.text}`}>Loading care plan...</span>
                 </div>
-                <div>
-                    <h4 className="font-semibold mb-2">Prescribe Medication</h4>
-                    <div className="space-y-2">
-                        <input type="text" value={newMed.name} onChange={e => setNewMed({...newMed, name: e.target.value})} placeholder="Medication Name" className={`w-full p-2 rounded-lg bg-transparent border-2 ${theme.accent} ${theme.text}`} />
-                        <div className="flex gap-2">
-                            <input type="text" value={newMed.dosage} onChange={e => setNewMed({...newMed, dosage: e.target.value})} placeholder="Dosage (e.g., 10mg)" className={`w-1/2 p-2 rounded-lg bg-transparent border-2 ${theme.accent} ${theme.text}`} />
-                            <input type="text" value={newMed.frequency} onChange={e => setNewMed({...newMed, frequency: e.target.value})} placeholder="Frequency" className={`w-1/2 p-2 rounded-lg bg-transparent border-2 ${theme.accent} ${theme.text}`} />
-                        </div>
-                        <AnimatedButton onClick={handleAddMed} icon={Pill} className="w-full mt-2 text-sm">Add Prescription</AnimatedButton>
-                    </div>
+            </GlassCard>
+        );
+    }
+
+    if (error) {
+        return (
+            <GlassCard>
+                <div className="text-center py-8">
+                    <p className={`text-red-500 mb-4 ${theme.text}`}>{error}</p>
+                    <button
+                        onClick={fetchCarePlan}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                    >
+                        Try Again
+                    </button>
                 </div>
+            </GlassCard>
+        );
+    }
+
+    return (
+        <div>
+            <div className="flex items-center justify-between mb-6">
+                <h3 className={`text-2xl font-bold ${theme.text}`}>Care Plan Management</h3>
+                <button
+                    onClick={fetchCarePlan}
+                    disabled={updating}
+                    className="p-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors disabled:opacity-50"
+                >
+                    <Loader2 className={`w-4 h-4 ${updating ? 'animate-spin' : ''}`} />
+                </button>
             </div>
-        </GlassCard>
+            
+            <CarePlan
+                tasks={carePlan?.tasks || []}
+                medications={carePlan?.medications || []}
+                onAddTask={handleAddTask}
+                onAddMedication={handleAddMedication}
+                onRemoveTask={handleRemoveTask}
+                onRemoveMedication={handleRemoveMedication}
+                theme={theme}
+                isEditable={true}
+            />
+        </div>
     );
 };
 
@@ -251,6 +362,15 @@ const PatientDetailView = ({ patient, onNavigate, theme, providerName, onUpdateP
                                 </div>
                             )}
                         </GlassCard>
+                    </div>
+
+                    {/* Care Plan Management Section */}
+                    <div className="mt-6">
+                        <CarePlanManager 
+                            patient={patientData} 
+                            theme={theme} 
+                            onUpdateCarePlan={handleUpdateCarePlan}
+                        />
                     </div>
                 </>
             )}

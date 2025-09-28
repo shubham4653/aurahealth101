@@ -158,22 +158,63 @@ const MessageItem = ({
         );
 
       case 'video_call':
+        const callStatus = message.content?.callStatus || message.callData?.callStatus || 'initiated';
+        const isCallActive = callStatus === 'initiated';
+        
         return (
-          <div className={`p-3 rounded-lg max-w-xs ${
-            isOwn ? 'bg-green-600 text-white' : `${theme.secondary} ${theme.text}`
-          }`}>
+          <div className={`p-4 rounded-lg max-w-sm cursor-pointer transition-all hover:scale-105 ${
+            isOwn 
+              ? 'bg-green-600 text-white' 
+              : isCallActive 
+                ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                : `${theme.secondary} ${theme.text}`
+          }`}
+          onClick={() => {
+            if (isCallActive && !isOwn) {
+              console.log('Video call notification clicked:', {
+                message,
+                conversationId: message.conversationId || message.conversation?._id,
+                isCallActive,
+                isOwn
+              });
+              
+              // Trigger video call for the other user
+              window.dispatchEvent(new CustomEvent('joinVideoCall', { 
+                detail: { 
+                  message, 
+                  conversationId: message.conversationId || message.conversation?._id 
+                } 
+              }));
+            }
+          }}>
             <div className="flex items-center gap-3">
-              <Video size={20} />
-              <div>
+              <div className={`p-2 rounded-full ${
+                isCallActive ? 'bg-white/20' : 'bg-white/10'
+              }`}>
+                <Video size={20} />
+              </div>
+              <div className="flex-1">
                 <p className="font-semibold">
-                  {message.callData.callStatus === 'initiated' ? 'Video call initiated' :
-                   message.callData.callStatus === 'answered' ? 'Video call answered' :
-                   message.callData.callStatus === 'ended' ? 'Video call ended' :
-                   'Video call missed'}
+                  {callStatus === 'initiated' ? (
+                    isOwn ? 'You started a video call' : 'Video call incoming'
+                  ) : callStatus === 'accepted' ? 'Video call accepted' :
+                     callStatus === 'declined' ? 'Video call declined' :
+                     callStatus === 'ended' ? 'Video call ended' :
+                     'Video call missed'}
                 </p>
-                {message.callData.callDuration && (
-                  <p className="text-sm opacity-70">
+                {message.content?.message && (
+                  <p className="text-sm opacity-80 mt-1">
+                    {message.content.message}
+                  </p>
+                )}
+                {message.callData?.callDuration && (
+                  <p className="text-sm opacity-70 mt-1">
                     Duration: {formatTime(message.callData.callDuration)}
+                  </p>
+                )}
+                {isCallActive && !isOwn && (
+                  <p className="text-sm font-medium mt-2 opacity-90">
+                    Click to join the call
                   </p>
                 )}
               </div>

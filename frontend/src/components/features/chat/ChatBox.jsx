@@ -30,6 +30,8 @@ const ChatBox = ({
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [showVideoCall, setShowVideoCall] = useState(false);
+  const [callAccepted, setCallAccepted] = useState(false);
+  const [callConnected, setCallConnected] = useState(false);
   const messagesEndRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
@@ -51,6 +53,59 @@ const ChatBox = ({
       loadMessages();
       markMessagesAsRead();
     }
+  }, [conversation]);
+
+  // Real-time message polling
+  useEffect(() => {
+    if (!conversation) return;
+
+    const pollForNewMessages = async () => {
+      try {
+        const response = await getMessages(conversation._id, 1, 50);
+        if (response.success) {
+          const newMessages = response.data;
+          setMessages(prev => {
+            // Check if there are new messages
+            const latestMessage = newMessages[newMessages.length - 1];
+            const hasNewMessage = !prev.find(msg => msg._id === latestMessage?._id);
+            
+            if (hasNewMessage && latestMessage) {
+              return newMessages;
+            }
+            return prev;
+          });
+        }
+      } catch (error) {
+        console.error('Error polling for messages:', error);
+      }
+    };
+
+    // Poll every 2 seconds for new messages
+    const interval = setInterval(pollForNewMessages, 2000);
+    
+    return () => clearInterval(interval);
+  }, [conversation]);
+
+  // Listen for video call join events
+  useEffect(() => {
+    const handleJoinVideoCall = (event) => {
+      const { message, conversationId } = event.detail;
+      console.log('Join video call event received:', {
+        conversationId,
+        currentConversationId: conversation._id,
+        match: conversationId === conversation._id
+      });
+      
+      if (conversationId === conversation._id) {
+        console.log('Opening video call modal...');
+        setShowVideoCall(true);
+        setCallAccepted(false); // Reset call accepted state
+        setCallConnected(false); // Reset call connected state
+      }
+    };
+
+    window.addEventListener('joinVideoCall', handleJoinVideoCall);
+    return () => window.removeEventListener('joinVideoCall', handleJoinVideoCall);
   }, [conversation]);
 
   const loadMessages = async (pageNum = 1, append = false) => {
@@ -136,23 +191,32 @@ const ChatBox = ({
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'audio/webm;codecs=opus'
+      });
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
+      
+      const startTime = Date.now();
 
       mediaRecorder.ondataavailable = (event) => {
-        audioChunksRef.current.push(event.data);
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
       };
 
       mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
-        const audioFile = new File([audioBlob], 'voice-message.wav', { type: 'audio/wav' });
+        const duration = Math.round((Date.now() - startTime) / 1000);
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const audioFile = new File([audioBlob], `voice-message-${Date.now()}.webm`, { 
+          type: 'audio/webm' 
+        });
         
         try {
           const messageData = {
             conversationId: conversation._id,
             messageType: 'voice',
-            content: { duration: 0 } // Duration will be calculated on backend
+            content: { duration }
           };
 
           const response = await sendMessage(messageData, audioFile);
@@ -166,12 +230,14 @@ const ChatBox = ({
         // Clean up
         stream.getTracks().forEach(track => track.stop());
         audioChunksRef.current = [];
+        setIsRecording(false);
       };
 
-      mediaRecorder.start();
+      mediaRecorder.start(1000); // Collect data every second
       setIsRecording(true);
     } catch (error) {
       console.error('Error starting voice recording:', error);
+      alert('Unable to access microphone. Please check permissions.');
     }
   };
 
@@ -207,8 +273,66 @@ const ChatBox = ({
     }
   };
 
-  const handleStartVideoCall = () => {
-    setShowVideoCall(true);
+  const sendCallStatusUpdate = async (status) => {
+    try {
+      // Prevent duplicate "accepted" messages
+      if (status === 'accepted' && callAccepted) {
+        return;
+      }
+
+      const callMessage = {
+        conversationId: conversation._id,
+        messageType: 'video_call',
+        content: {
+          callStatus: status,
+          callType: 'video',
+          message: status === 'accepted' ? `${user.name} joined the video call` :
+                   status === 'ended' ? `${user.name} ended the video call` :
+                   `${user.name} ${status} the video call`
+        }
+      };
+
+      const response = await sendMessage(callMessage);
+      if (response.success) {
+        setMessages(prev => [...prev, response.data]);
+        if (status === 'accepted') {
+          setCallAccepted(true);
+        }
+      }
+    } catch (error) {
+      console.error('Error sending call status update:', error);
+    }
+  };
+
+  const handleStartVideoCall = async () => {
+    try {
+      // Generate a unique room ID for this call
+      const roomId = `call_${conversation._id}_${Date.now()}`;
+      
+      // Send video call notification message
+      const callMessage = {
+        conversationId: conversation._id,
+        messageType: 'video_call',
+        content: {
+          callStatus: 'initiated',
+          callType: 'video',
+          message: `${user.name} started a video call. Click to join!`,
+          roomId: roomId
+        }
+      };
+
+      const response = await sendMessage(callMessage);
+      if (response.success) {
+        setMessages(prev => [...prev, response.data]);
+      }
+
+      // Open video call modal with room ID
+      setShowVideoCall(true);
+    } catch (error) {
+      console.error('Error sending video call notification:', error);
+      // Still open the video call modal even if notification fails
+      setShowVideoCall(true);
+    }
   };
 
   const loadMoreMessages = () => {
@@ -300,7 +424,24 @@ const ChatBox = ({
       {/* Video Call Modal */}
       <VideoCallModal
         isOpen={showVideoCall}
-        onClose={() => setShowVideoCall(false)}
+        onClose={() => {
+          // Only send call ended notification if call was actually connected
+          if (callConnected) {
+            sendCallStatusUpdate('ended');
+          }
+          setShowVideoCall(false);
+          setCallAccepted(false);
+          setCallConnected(false);
+        }}
+        onCallAccepted={() => {
+          if (!callAccepted) {
+            sendCallStatusUpdate('accepted');
+            setCallAccepted(true);
+          }
+        }}
+        onCallConnected={() => {
+          setCallConnected(true); // Mark call as connected when video starts
+        }}
         conversation={conversation}
         currentUserId={currentUserId}
         user={user}
