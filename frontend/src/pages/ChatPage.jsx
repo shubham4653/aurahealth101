@@ -88,7 +88,7 @@ const ChatPage = ({ user }) => {
   );
 
   return (
-    <div className="h-[calc(100vh-80px)] flex flex-col">
+    <div className="h-[calc(100vh-80px)] flex flex-col min-h-screen">
       <div className="p-6 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between">
           <div>

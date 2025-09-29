@@ -12,7 +12,7 @@ const Header = ({ user, onLogout, onNavigate }) => {
         <header className={`p-4 flex justify-between items-center sticky top-0 z-40 ${theme.glass}`}>
             <div className="flex items-center gap-3 cursor-pointer" onClick={() => onNavigate('dashboard')}>
                 <BrainCircuit className={`w-8 h-8 text-blue-400`} />
-                <h1 className={`text-xl font-bold tracking-tighter ${theme.text}`}>AuraHealth</h1>
+                <h1 className={`text-xl font-bold tracking-tighter ${theme.text}`}>Aura Health</h1>
             </div>
             <div className="flex items-center gap-4">
                 {user.type !== 'admin' && <AnimatedButton onClick={() => onNavigate('chat')} icon={MessageCircle} className="px-4 py-2 text-sm">Messages</AnimatedButton>}

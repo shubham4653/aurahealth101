@@ -190,8 +190,7 @@ const PatientProfilePage = ({ user, onUpdatePatientData, isViewOnly = false }) =
     const patientIdDisplay = (user._id || user.id || '').slice(-10).toUpperCase();
 
     return (
-
-        <div className="p-6">
+        <div className="p-6 min-h-screen">
             <GlassCard>
                 <div className="flex flex-col md:flex-row justify-between items-start gap-4">
                     <div className="flex items-center gap-6">

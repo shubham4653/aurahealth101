@@ -91,8 +91,8 @@ const AuthPage = ({ onLogin, onSignUp }) => {
             {/* The GlassCard is set to z-10 to appear in front of the background */}
             <GlassCard className="w-full max-w-md z-10">
                 <div className="text-center mb-8">
-                    <img src="/aurahealth.png" alt="AuraHealth Logo" className="w-18 h-18 mx-auto" onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/72x72/000000/FFFFFF?text=Aura'; }}/>
-                    <h1 className={`text-4xl font-bold mt-4 ${theme.text}`}>AuraHealth</h1>
+                    <img src="/aurahealth.png" alt="Aura Health Logo" className="w-18 h-18 mx-auto" onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/72x72/000000/FFFFFF?text=Aura+Health'; }}/>
+                    <h1 className={`text-4xl font-bold mt-4 ${theme.text}`}>Aura Health</h1>
                     <p className={`mt-2 opacity-80 ${theme.text}`}>{isLogin ? 'Your Health, Your Data, Your Control.' : 'Create your secure health account.'}</p>
                 </div>
                 <div className={`flex p-1 rounded-full mb-6 ${theme.secondary}`}>

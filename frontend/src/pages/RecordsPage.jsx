@@ -44,6 +44,12 @@ const RecordsPage = ({ user, onNavigate }) => {
                 const endpoint = '/medical-record/patient';
                 console.log('🔍 Using endpoint:', endpoint, 'for user role:', user.role);
                 const response = await api.get(endpoint, { withCredentials: true });
+                console.log('🔍 Medical Records Response:', response.data);
+                console.log('🔍 Records Data:', response.data.data);
+                if (response.data.data && response.data.data.length > 0) {
+                    console.log('🔍 First Record ProviderId:', response.data.data[0].providerId);
+                    console.log('🔍 First Record Provider:', response.data.data[0].provider);
+                }
                 setRecords(response.data.data || []);
             } catch (err) {
                 console.error('🔍 Records fetch error:', err.response?.data || err.message);
@@ -187,7 +193,7 @@ const RecordsPage = ({ user, onNavigate }) => {
                                             <strong>File:</strong> {record.fileName}
                                         </p>
                                         <p className={`text-sm ${theme.secondaryText} opacity-70 mb-2`}>
-                                            <strong>From:</strong> {record.provider?.name || 'Unknown Provider'}
+                                            <strong>From:</strong> {record.providerId?.name || 'Unknown Provider'}
                                         </p>
                                         <p className={`text-sm ${theme.secondaryText} opacity-70 mb-2`}>
                                             <strong>Uploaded:</strong> {new Date(record.uploadDate).toLocaleDateString()}

@@ -64,7 +64,7 @@ const AdminDashboard = ({ user }) => {
     );
 
     return (
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-6 min-h-screen">
             <div>
                 <h1 className={`text-3xl font-bold ${theme.text}`}>Admin Console</h1>
                 <p className={`opacity-80 ${theme.text}`}>Live platform statistics and user management.</p>

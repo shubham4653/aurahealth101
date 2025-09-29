@@ -4,6 +4,7 @@ import { mockPatientData, mockProviderData, mockAdminData } from './data/mockDat
 import MainLayout from './components/layout/MainLayout';
 import { PatientOnboardingForm, ProviderOnboardingForm } from './components/features/Onboarding';
 import { logoutPatient, logoutProvider, getPatientProfile } from './api/auth';
+import HomePage from './pages/HomePage';
 
 
 //Page Components
@@ -30,7 +31,7 @@ import UploadRecordPage from './pages/UploadRecordPage';
 function AppContent() {
     const { theme } = useContext(ThemeContext);
     const [user, setUser] = useState(null);
-    const [view, setView] = useState('auth');
+    const [view, setView] = useState('home');
     const [activeId, setActiveId] = useState(null);
     const [viewHistory, setViewHistory] = useState([]);
     const [needsOnboarding, setNeedsOnboarding] = useState(false);
@@ -172,7 +173,7 @@ function AppContent() {
         setUser(null);
         setActiveId(null);
         setNeedsOnboarding(false);
-        setView('auth');
+        setView('home');
         setViewHistory([]);
     };
 
@@ -191,8 +192,16 @@ function AppContent() {
         }
     };
 
+    const handleTryNow = () => {
+        setView('auth');
+    };
+
     const renderPage = () => {
-        if (!user) {
+        if (view === 'home') {
+            return <HomePage onTryNow={handleTryNow} />;
+        }
+        
+        if (!user && view === 'auth') {
             return <AuthPage onLogin={handleLogin} onSignUp={handleSignUp} />;
         }
 
@@ -213,7 +222,7 @@ function AppContent() {
         let pageComponent;
         switch (view) {
             case 'dashboard':
-                if (currentUser.type === 'patient') pageComponent = <PatientDashboard user={currentUser} />;
+                if (currentUser.type === 'patient') pageComponent = <PatientDashboard user={currentUser} onNavigate={handleNavigate} />;
                 else if (currentUser.type === 'provider') pageComponent = <ProviderDashboard user={currentUser} onNavigate={handleNavigate} patients={patients} />;
                 else if (currentUser.type === 'admin') pageComponent = <AdminDashboard user={currentUser} />;
                 break;
@@ -256,7 +265,12 @@ function AppContent() {
         }
 
         return (
-            <MainLayout user={currentUser} onLogout={handleLogout} onNavigate={handleNavigate}>
+            <MainLayout 
+                user={currentUser} 
+                onLogout={handleLogout} 
+                onNavigate={handleNavigate}
+                currentView={view}
+            >
                 {pageComponent}
             </MainLayout>
         );

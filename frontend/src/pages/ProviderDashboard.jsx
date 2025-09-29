@@ -61,37 +61,37 @@ const ProviderDashboard = ({ user, onNavigate }) => {
     };
 
     return (
-        <div className="p-6 space-y-6">
-            <div className="flex justify-between items-center">
+        <div className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6 min-h-screen">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                 <div>
-                    <h1 className={`text-3xl font-bold ${theme.text}`}>Welcome back, {user.name}!</h1>
-                    <p className={`opacity-80 ${theme.text}`}>Here is your dashboard for today.</p>
+                    <h1 className={`text-2xl sm:text-3xl font-bold ${theme.text}`}>Welcome back, {user.name}!</h1>
+                    <p className={`opacity-80 ${theme.text} text-sm sm:text-base`}>Here is your dashboard for today.</p>
                 </div>
                 {onNavigate && (
-                    <AnimatedButton onClick={() => onNavigate('upload-record')} className="px-4 py-2 text-sm">
+                    <AnimatedButton onClick={() => onNavigate('upload-record')} className="px-4 py-2 text-sm w-full sm:w-auto">
                         Upload New Record
                     </AnimatedButton>
                 )}
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <GlassCard><h4 className="font-bold">Total Patients</h4><p className="text-3xl font-bold">{patients.length}</p></GlassCard>
-                <GlassCard><h4 className="font-bold">Today's Appointments</h4><p className="text-3xl font-bold">{todaysAppointments.length}</p></GlassCard>
-                <GlassCard><h4 className="font-bold">Total Appointments</h4><p className="text-3xl font-bold">{appointments.length}</p></GlassCard>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+                <GlassCard><h4 className="font-bold text-sm sm:text-base">Total Patients</h4><p className="text-2xl sm:text-3xl font-bold">{patients.length}</p></GlassCard>
+                <GlassCard><h4 className="font-bold text-sm sm:text-base">Today's Appointments</h4><p className="text-2xl sm:text-3xl font-bold">{todaysAppointments.length}</p></GlassCard>
+                <GlassCard><h4 className="font-bold text-sm sm:text-base">Total Appointments</h4><p className="text-2xl sm:text-3xl font-bold">{appointments.length}</p></GlassCard>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 <GlassCard>
-                    <h3 className={`text-xl font-bold mb-4 ${theme.text}`}>Recent Appointments</h3>
-                    <div className="space-y-3">
+                    <h3 className={`text-lg sm:text-xl font-bold mb-3 sm:mb-4 ${theme.text}`}>Recent Appointments</h3>
+                    <div className="space-y-2 sm:space-y-3">
                         {appointments.slice(0, 3).map(apt => (
-                            <div key={apt._id} className={`p-3 rounded-lg flex items-center justify-between ${theme.secondary}`}>
-                                <div>
-                                    <p className="font-semibold">{apt.patientId?.name || 'Unknown Patient'}</p>
-                                    <p className="text-sm opacity-70">{apt.reason}</p>
+                            <div key={apt._id} className={`p-3 rounded-lg flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 ${theme.secondary}`}>
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-semibold text-sm sm:text-base truncate">{apt.patientId?.name || 'Unknown Patient'}</p>
+                                    <p className="text-xs sm:text-sm opacity-70 truncate">{apt.reason}</p>
                                     <p className="text-xs opacity-50">{new Date(apt.appointmentDate).toLocaleDateString()}</p>
                                 </div>
-                                <div className="text-right">
-                                    <p className="font-bold">{apt.time}</p>
+                                <div className="flex items-center justify-between sm:flex-col sm:text-right sm:items-end">
+                                    <p className="font-bold text-sm sm:text-base">{apt.time}</p>
                                     <span className={`text-xs px-2 py-1 rounded-full ${
                                         apt.status === 'Scheduled' ? 'bg-blue-500/20 text-blue-500' :
                                         apt.status === 'Completed' ? 'bg-green-500/20 text-green-500' :
@@ -103,28 +103,28 @@ const ProviderDashboard = ({ user, onNavigate }) => {
                             </div>
                         ))}
                         {appointments.length === 0 && (
-                            <p className={`text-center ${theme.text} opacity-70`}>No appointments found</p>
+                            <p className={`text-center ${theme.text} opacity-70 text-sm`}>No appointments found</p>
                         )}
                     </div>
                 </GlassCard>
                  <GlassCard>
-                    <div className="flex justify-between items-center mb-4">
-                        <h3 className={`text-xl font-bold ${theme.text}`}>Today's Appointments</h3>
-                        <button onClick={() => onNavigate('provider-appointments')} className="text-sm text-blue-400 hover:underline">View All</button>
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-3 sm:mb-4 gap-2">
+                        <h3 className={`text-lg sm:text-xl font-bold ${theme.text}`}>Today's Appointments</h3>
+                        <button onClick={() => onNavigate('provider-appointments')} className="text-xs sm:text-sm text-blue-400 hover:underline self-start sm:self-auto">View All</button>
                     </div>
-                    <div className="space-y-3">
+                    <div className="space-y-2 sm:space-y-3">
                         {todaysAppointments.length > 0 ? (
                             todaysAppointments.map(apt => (
-                                <div key={apt._id} className={`p-3 rounded-lg flex items-center justify-between ${theme.secondary}`}>
-                                    <div>
-                                        <p className="font-semibold">{apt.patientId?.name || 'Unknown Patient'}</p>
-                                        <p className="text-sm opacity-70">{apt.reason}</p>
+                                <div key={apt._id} className={`p-3 rounded-lg flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 ${theme.secondary}`}>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="font-semibold text-sm sm:text-base truncate">{apt.patientId?.name || 'Unknown Patient'}</p>
+                                        <p className="text-xs sm:text-sm opacity-70 truncate">{apt.reason}</p>
                                     </div>
-                                    <p className="font-bold">{apt.time}</p>
+                                    <p className="font-bold text-sm sm:text-base">{apt.time}</p>
                                 </div>
                             ))
                         ) : (
-                            <p className={`text-center ${theme.text} opacity-70`}>No appointments scheduled for today</p>
+                            <p className={`text-center ${theme.text} opacity-70 text-sm`}>No appointments scheduled for today</p>
                         )}
                     </div>
                 </GlassCard>
@@ -132,33 +132,33 @@ const ProviderDashboard = ({ user, onNavigate }) => {
             </div>
 
             <GlassCard>
-                <div className="flex justify-between items-center mb-4">
-                    <h3 className={`text-xl font-bold ${theme.text}`}>Your Patients</h3>
-                     <div className="relative">
-                        <input type="text" placeholder="Search patients..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className={`w-full p-2 pl-10 rounded-lg bg-transparent border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme.accent} ${theme.text}`} />
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 opacity-50"/>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-4">
+                    <h3 className={`text-lg sm:text-xl font-bold ${theme.text}`}>Your Patients</h3>
+                     <div className="relative w-full sm:w-64">
+                        <input type="text" placeholder="Search patients..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className={`w-full p-2 pl-10 rounded-lg bg-transparent border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme.accent} ${theme.text} text-sm`} />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 opacity-50"/>
                     </div>
                 </div>
-                <div className="max-h-96 overflow-y-auto pr-2">
+                <div className="max-h-80 sm:max-h-96 overflow-y-auto pr-2">
                     {loading ? (
-                        <p className={theme.text}>Loading patients...</p>
+                        <p className={`${theme.text} text-sm`}>Loading patients...</p>
                     ) : error ? (
-                        <p className="text-red-500">{error}</p>
+                        <p className="text-red-500 text-sm">{error}</p>
                     ) : filteredPatients.length > 0 ? (
                         filteredPatients.map(p => (
-                            <div key={p._id} onClick={() => onNavigate('view-patient', p._id)} className={`p-3 mb-2 rounded-lg flex items-center justify-between cursor-pointer transition-colors hover:bg-slate-700 ${theme.secondary}`}>
-                                <div>
-                                    <p className="font-semibold">{p.name} <span className="opacity-60 text-sm">({p._id.slice(-6)})</span></p>
-                                    <p className="text-sm opacity-70">{p.email}</p>
+                            <div key={p._id} onClick={() => onNavigate('view-patient', p._id)} className={`p-3 mb-2 rounded-lg flex flex-col sm:flex-row sm:items-center sm:justify-between cursor-pointer transition-colors hover:bg-slate-700 gap-2 sm:gap-0 ${theme.secondary}`}>
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-semibold text-sm sm:text-base truncate">{p.name} <span className="opacity-60 text-xs sm:text-sm">({p._id.slice(-6)})</span></p>
+                                    <p className="text-xs sm:text-sm opacity-70 truncate">{p.email}</p>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <div className={`w-3 h-3 rounded-full ${getStatusColor('Stable')}`}></div>
-                                    <span>Stable</span>
+                                    <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${getStatusColor('Stable')}`}></div>
+                                    <span className="text-xs sm:text-sm">Stable</span>
                                 </div>
                             </div>
                         ))
                     ) : (
-                        <p className={theme.text}>No patients found.</p>
+                        <p className={`${theme.text} text-sm`}>No patients found.</p>
                     )}
                 </div>
 

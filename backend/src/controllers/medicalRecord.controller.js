@@ -112,10 +112,18 @@ const uploadRecord = asyncHandler(async (req, res) => {
 const getPatientRecords = asyncHandler(async (req, res) => {
   const patientId = req.patient._id;
   
+  console.log('🔍 Backend: Fetching records for patient:', patientId);
+  
   const records = await MedicalRecord.find({ 
     patientId, 
     isActive: true 
-  }).populate('provider', 'name specialty email');
+  }).populate('providerId', 'name specialty email');
+  
+  console.log('🔍 Backend: Found records:', records.length);
+  if (records.length > 0) {
+    console.log('🔍 Backend: First record providerId:', records[0].providerId);
+    console.log('🔍 Backend: First record provider:', records[0].provider);
+  }
   
   return res.status(200).json(
     new ApiResponse(200, records, 'Patient records retrieved successfully')

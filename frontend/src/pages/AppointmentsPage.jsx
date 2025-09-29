@@ -54,7 +54,7 @@ const AppointmentsPage = ({ user }) => {
     };
 
     return (
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-6 min-h-screen">
             <div className="flex justify-between items-center">
                 <h1 className={`text-3xl font-bold ${theme.text}`}>Your Appointments</h1>
                 <AnimatedButton onClick={() => setShowScheduler(true)} icon={CalendarPlus}>
