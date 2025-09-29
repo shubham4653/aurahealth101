@@ -19,7 +19,8 @@ const app = express();
 const allowedOrigins = [
     'http://localhost:5173', // Vite dev server
     'http://localhost:3000', // Alternative dev port
-    process.env.FRONTEND_URL, // Production frontend URL
+    'https://aurahealth101.vercel.app', // Your production frontend URL
+    process.env.FRONTEND_URL, // Additional frontend URL from environment
     process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null, // Vercel preview URLs
 ].filter(Boolean);
 
