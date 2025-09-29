@@ -15,11 +15,36 @@ import carePlanRoutes from './routes/carePlan.routes.js';
 
 const app = express();
 
+// CORS configuration for production and development
+const allowedOrigins = [
+    'http://localhost:5173', // Vite dev server
+    'http://localhost:3000', // Alternative dev port
+    process.env.FRONTEND_URL, // Production frontend URL
+    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null, // Vercel preview URLs
+].filter(Boolean);
+
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: function (origin, callback) {
+        // Allow requests with no origin (mobile apps, Postman, etc.)
+        if (!origin) return callback(null, true);
+        
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+        
+        // For development, allow any localhost origin
+        if (process.env.NODE_ENV === 'development' && origin.includes('localhost')) {
+            return callback(null, true);
+        }
+        
+        // For production, be more strict
+        console.log('🚫 CORS blocked origin:', origin);
+        return callback(new Error('Not allowed by CORS'), false);
+    },
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
     credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    optionsSuccessStatus: 200
 }));
 
 
