@@ -10,10 +10,20 @@ export const themes = {
 export const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-    const [theme, setTheme] = useState(themes.prestige);
+    // Load theme from localStorage or default to prestige
+    const [theme, setTheme] = useState(() => {
+        const savedTheme = localStorage.getItem('selectedTheme');
+        return savedTheme ? themes[savedTheme] || themes.prestige : themes.prestige;
+    });
+
+    // Save theme to localStorage whenever it changes
+    const handleSetTheme = (newTheme) => {
+        setTheme(newTheme);
+        localStorage.setItem('selectedTheme', newTheme.name.toLowerCase());
+    };
 
     return (
-        <ThemeContext.Provider value={{ theme, setTheme, themes }}>
+        <ThemeContext.Provider value={{ theme, setTheme: handleSetTheme, themes }}>
             {children}
         </ThemeContext.Provider>
     );

@@ -147,14 +147,14 @@ const HeroSection = ({ onTryNow }) => {
                             </span>
                         </motion.button>
                         
-                        <motion.button 
+                        {/* <motion.button 
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             className="group w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 border-2 border-white/30 text-white font-semibold rounded-full text-lg hover:bg-white/10 transition-all duration-300"
                         >
                             <Play className="w-5 h-5" />
-                            Watch Demo
-                        </motion.button>
+                            
+                        </motion.button> */}
                     </motion.div>
                 </motion.div>
             </div>
@@ -326,7 +326,7 @@ const TechStackSection = () => {
 // Stats Section
 const StatsSection = () => {
     const stats = [
-        { number: "10K+", label: "Active Users", icon: Users },
+        { number: "Trust", label: "Patient Centric", icon: Users },
         { number: "99.9%", label: "Uptime", icon: Zap },
         { number: "256-bit", label: "Encryption", icon: Lock },
         { number: "24/7", label: "Support", icon: Globe }

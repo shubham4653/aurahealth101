@@ -29,8 +29,8 @@ const HomeNavbar = ({ onTryNow }) => {
     const navItems = [
         { name: 'Features', href: '#features' },
         { name: 'Technology', href: '#technology' },
-        { name: 'About', href: '#about' },
-        { name: 'Contact', href: '#contact' }
+        // { name: 'About', href: '#about' },
+        // { name: 'Contact', href: '#contact' }
     ];
 
     const scrollToSection = (href) => {

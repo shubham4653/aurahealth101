@@ -3,6 +3,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Search } from 'lucide-react';
 import { ThemeContext } from '../context/ThemeContext';
 import GlassCard from '../components/ui/GlassCard';
+import ThemeSwitcher from '../components/ui/ThemeSwitcher';
 import { getAllPatients } from '../api/patients';
 import { getProviderAppointments } from '../api/appointments';
 import AnimatedButton from '../components/ui/AnimatedButton';
@@ -67,11 +68,14 @@ const ProviderDashboard = ({ user, onNavigate }) => {
                     <h1 className={`text-2xl sm:text-3xl font-bold ${theme.text}`}>Welcome back, {user.name}!</h1>
                     <p className={`opacity-80 ${theme.text} text-sm sm:text-base`}>Here is your dashboard for today.</p>
                 </div>
-                {onNavigate && (
-                    <AnimatedButton onClick={() => onNavigate('upload-record')} className="px-4 py-2 text-sm w-full sm:w-auto">
-                        Upload New Record
-                    </AnimatedButton>
-                )}
+                <div className="flex items-center gap-3">
+                    <ThemeSwitcher />
+                    {onNavigate && (
+                        <AnimatedButton onClick={() => onNavigate('upload-record')} className="px-4 py-2 text-sm w-full sm:w-auto">
+                            Upload New Record
+                        </AnimatedButton>
+                    )}
+                </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
                 <GlassCard><h4 className="font-bold text-sm sm:text-base">Total Patients</h4><p className="text-2xl sm:text-3xl font-bold">{patients.length}</p></GlassCard>

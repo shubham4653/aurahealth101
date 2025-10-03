@@ -3,6 +3,7 @@ import { Heart, Activity, Droplets, Footprints, Sparkles, Loader2, X, Calendar, 
 import { ThemeContext } from '../context/ThemeContext';
 import GlassCard from '../components/ui/GlassCard';
 import AnimatedButton from '../components/ui/AnimatedButton';
+import ThemeSwitcher from '../components/ui/ThemeSwitcher';
 import { generateWellnessPlan } from '../api/gemini';
 
 
@@ -254,7 +255,8 @@ const PatientDashboard = ({ user, isViewOnly=false, onNavigate }) => {
                                     Here's your comprehensive health overview
                                 </p>
                             </div>
-                            <div className="mt-4 sm:mt-0">
+                            <div className="mt-4 sm:mt-0 flex items-center gap-3">
+                                <ThemeSwitcher />
                                 <div className={`inline-flex items-center px-3 sm:px-4 py-2 rounded-full ${theme.secondary} ${theme.text}`}>
                                     <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
                                     <span className="text-xs sm:text-sm font-medium">All systems normal</span>
