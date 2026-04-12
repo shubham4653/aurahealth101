@@ -1,5 +1,5 @@
 
-```
+
 # 🏥 Aura Health 
 ### Decentralized Patient-Centric Medical Record Management
 
@@ -31,14 +31,14 @@ React.js • Node.js • Express • Solidity • Hardhat • Ethers.js • Clou
 ---
 
 ## 📦 Project Structure
-```
+
 
 medichain/
 ├── blockchain/   # Smart contracts & Hardhat setup
 ├── backend/      # Node.js API
 └── frontend/     # React dashboard
 
-````
+
 
 ---
 
