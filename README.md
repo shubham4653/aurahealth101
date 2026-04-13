@@ -3,7 +3,7 @@
 # 🏥 Aura Health 
 ### Decentralized Patient-Centric Medical Record Management
 
-**Aura Health ** is a hybrid blockchain system that gives patients full control over their medical records. Using **Ethereum smart contracts** and **encrypted cloud storage**, it ensures medical data is secure, immutable, and accessible only with patient consent.
+**Aura Health**  is a hybrid blockchain system that gives patients full control over their medical records. Using **Ethereum smart contracts** and **encrypted cloud storage**, it ensures medical data is secure, immutable, and accessible only with patient consent.
 
 ---
 
